@@ -1,0 +1,405 @@
+(defcfg
+  ;; ** For Linux **
+
+  input  (device-file "/dev/input/by-path/platform-i8042-serio-0-event-kbd") ;; laptop
+  ;; input  (device-file "/dev/input/by-path/pci-0000:00:14.0-usb-0:3.2:1.0-event-kbd") ;; office
+  
+  ;; input  (device-file "/dev/input/by-path/pci-0000:00:14.0-usbv2-0:3.2:1.0-event-kbd") ;; 
+  ;; input  (device-file "/dev/input/by-path/platform-i8042-serio-0-event-kbd") ;; 
+  ;; input  (device-file "/dev/input/by-id/usb-Matias_Ergo_Pro_Keyboard-event-kbd") ;; example
+  
+  output (uinput-sink "KMonad output")
+
+  ;; ** For Windows **
+  ;; input  (low-level-hook)
+  ;; output (send-event-sink)
+
+  ;; ** For MacOS **
+  ;; input  (iokit-name "my-keyboard-product-string")
+  ;; output (kext)
+
+  fallthrough true
+  allow-cmd true
+)
+
+(defsrc
+  esc  f1  f2   f3  f4   f5  f6   f7  f8   f9 f10  f11  f12 insert delete
+  grv   1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab    q    w    e    r    t    y    u    i    o    p    [    ]    \
+  caps    a    s    d    f    g    h    j    k    l    ;    '   ret
+  lsft     z    x    c    v    b    n    m    ,    .    /    rsft
+  lctl     lmet lalt          spc          ralt rctl   left up down right
+)
+
+(deflayer layer-0-main
+  esc  f1  f2   f3  f4   f5  f6   f7  f8   f9 f10  f11  f12 insert delete
+  grv   1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  @0tab    q    w    e    r    t    y    u    i    o    p    [    ]    \
+  @0caps    a    s    d    f    g    h    j    k    l    ;    '   ret
+  @0lsft   z    x    c    v    b    n    m    ,    .    /    @0rsft
+  XX     lmet @0cmd          spc          @ralt-first-tap   rctl   left up down right
+)
+
+;; ---------------------------------------------
+;; tab on press, lctl on hold
+(defalias 0tab (tap-hold 200 tab (around lctl (layer-toggle 0tab))))
+(deflayer 0tab
+  _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
+  _  lsft  _    _    _    _    _    _    _    _    _    _    _   _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _     _    _    _    _    _    _    _    _    _    _    _       _ 
+  _     _    _    _    _    _    _    _    _    _    _        _ 
+  _      _    _              _              _    _    _   _   _   _
+)
+
+
+
+;; ---------------------------------------------
+
+(defalias 0lsft (around lsft (layer-toggle 0sft)))
+(defalias 0rsft (around rsft (layer-toggle 0sft)))
+(deflayer 0sft
+  _  _    _    _   _    _   _    _   _    _   _    _    _    _   @bspc
+  _   _    _    _    _    _    _    _    _    _    _    _    _    @delete
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _     _    _    _    _    _    _    _    _    _    _    _       _ 
+  XX     _    _    _    _    _    _    _    _    _    _        XX 
+  _      _    _              _              _    _    _   _   _   _
+)
+
+(defalias bspc   (cmd-button "xdotool key BackSpace"))
+(defalias delete (cmd-button "xdotool key Delete"))
+
+;; ---------------------------------------------
+
+(defalias 0cmd (around lctl (layer-toggle 0ctl)))
+(deflayer 0ctl
+  _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
+  tab  _    _    _    _    _    _    _    _    _    _    _    _    _
+@cmd-tab _  _    _    _    _    _    _    _    _    _    _    _    _
+  _     _    _    _    _    _    _    _    _    _    _    _       _ 
+  _      _    _    _    _    _    _    _    _    _    _        _ 
+  _     lsft    _      (layer-toggle 1ctl)    _    _    _   _   _   _
+)
+(deflayer 1ctl
+  _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
+  _  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _ _  _    _    _    _    _    _    _    _    _    _    _    _
+  _     _    _    _    _    _    _    _    _    _    _    _       _ 
+  _      _    _    _    _    _    _    _    _    _    _        _ 
+  _      _    _               _             _    _   _   _   _   _
+)
+;; (defalias cmd-tab (release-only lctl) A-tab (press-only lctl))
+(defalias cmd-tab A-tab) ;; and set Ctrl+Alt+tab as the main windows switcher
+
+
+
+;; ---------------------------------------------
+
+(defalias 0caps    (around lctl (sticky-key 100 (layer-toggle 0caps))))
+(defalias 1caps-enter (layer-add 1caps))
+(defalias 1caps-exit (layer-rem 1caps))
+(defalias 1caps    (tap-next @1caps-enter (around lctl @1caps-enter)))
+(deflayer 0caps
+  _  _    _    _    _    _    _    _    _    _    _    _    _    _  _
+  _  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _  _    _    _    _    _    _    _    _    _    _    _    _    _
+  @1caps-enter  _    _    _    _    _    _    _    _    _    _    _    _ 
+  _  _    _    _    _    _    _    _    _    _        _      _ 
+  _  _    _              _          _ _      _ _ _ _
+)
+(deflayer 1caps
+  @1caps-exit  _    _    _    _    _    _    _    _    _    _    _    _    _  _
+  _  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _  _    _    _    _    _    _    _    @mse↑    @mse→    _    _    _    _
+  _  _    _    _    _    _    _    @mse←    @mse↓    _ _   _    _
+  _  _    _    _    _    _    _    _            _         _     _      _
+  _  _    _              _                     _  _   _ _ _ _
+)
+
+
+
+
+;; ---------------------------------------------
+
+
+;; My natural right hand position when typing text is the following:
+;; index finger on the joint (J,N,M)
+;; middle finger on the (I)
+;; anular finger on the (O)
+;; pinky finger on the ([)
+;; thumb finger on the laptop, below (ralt) and unable to reach it comfortably, but with the tip over the (space bar)
+
+;; My natural right hand position when typing text is the following:
+;; index finger on (f)
+;; middle finger on the joint (r,4)
+;; anular finger on the joint (3,e)
+;; pinky finger on the joint (1,tab,q)
+;; thumb finger symmetric to the left, below (lalt) unable to reach it comfortably, but with the tip over the (space bar)
+
+;; jiko
+;; erdf
+;; 
+;; Activate with (q hold then w) deactivate with (q)
+;; Activate with ([ hold then p) deactivate with ([)
+;; backspace with (t) and (u), with the thumb
+;; ctrl with (space bar), with the thumb
+;; alt with (lalt) and (ralt), with the thumb
+;; @fn with (rctl) and (super) with the thumb
+;; 
+;; shift with (w) and (p), with the pinky
+;; tab with (g) and (h)
+;; 
+;; @enter_navigation with (b)
+;; Shortcuts ctrl c v x z y.
+
+
+(defalias
+  ;; key-right-hand-lock
+  key-ralt (around ralt (layer-toggle layer-right-hand-entrance))
+  key-ralt2 (around lalt (layer-toggle layer-right-hand-entrance))
+  rh-enter (layer-add layer-right-hand)
+  rh-exit (layer-rem layer-right-hand)
+  rh-lck (stepped @rh-enter @rh-exit)
+)
+
+
+
+(deflayer layer-right-hand-entrance
+  _  _    _    _    _    _    _    _    _    _    _    _    _    _  _
+  _  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _  _    _    _    _    _    _    _    _    _    _    _    _ 
+  _  _    _    _    _    _    _    _    _    _        _      _ 
+  _  _    _              @rh-enter             _     _      _ _ _ _
+)
+
+
+(defalias ralt-first-tap    (around ralt (sticky-key 100 (layer-toggle layer-ralt-first-tap))))
+(deflayer layer-ralt-first-tap
+  _  _    _    _    _    _    _    _    _    _    _    _    _    _  _
+  _  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _  _    _    _    _    _    _    _    _    _    _    _    _ 
+  _  _    _    _    _    _    _    _    _    _        _      _ 
+  _  _    _              _          (tap-next @rh-enter (around lalt @rh-enter)) _      _ _ _ _
+)
+
+(deflayer layer-right-hand
+@rh-exit  _    _    _    _    _   _    _    _    _    _    _    _    _  _
+  _  _    _    _    _    _    _     _     _     _     _      _     _    @rh-exit
+  _   _    _    _    _    _    _   delete  @↑    @→   @1fn  @1sft  C-c  C-v
+  _    _    _    _    _    _    _     @←    @↓    XX     XX   C-x       _
+  @1sft _    _    _    _    _   tab    bspc  XX     XX   @nav      @1sft
+  _     _    _          @rh-exit            lalt  lctrl   _   _ _   _
+)
+
+(defalias 1fn (layer-toggle layer-1fn))
+(deflayer layer-1fn
+@rh-exit  _    _    _    _    _   _    _    _    _    _    _    _    _  _
+  _  _    _    _    _    _    _     _     _     _     _      _     _    _
+  _   _    _    _    _    _    _    bspc  @⇑⇑    @⇒⇒    _    _     _   _
+  _    _    _    _    _    _    _     @⇐⇐    @⇓⇓    _     _    _        _
+  _     _    _    _    _    _    _   delete  _     _      _      _
+  _     _    _          _                     _     _     @⇐⇐ @⇑⇑ @⇓⇓ @⇒⇒
+)
+
+(defalias 1sft (around sft (layer-toggle layer-1-right-hand-sft)))
+(deflayer layer-1-right-hand-sft
+@rh-exit  _    _    _    _    _    _    _    _    _    _    _    _    _  @bspc
+  _  _    _    _    _    _    _    _    _    _    _    _    _    @delete
+  _  _    _    _    _    _    _  @bspc  _   _   _    _    _    _
+  _  _    _    _    _    _      _      _    _    _   _   _    _
+  _  _    _    _    _    _        _    @delete     _   _  _      _
+  _  _    _              _                   _  _   _ _ _ _
+)
+
+(defalias
+  nav (layer-toggle layer-nav)
+)
+(deflayer layer-nav
+  _  _    _    _    _    _    _    _    _    _    _    _    _    _  _
+  _  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _  _    _    _    _    _    _    _    @mse↑    @mse→    _    _    _    _
+  _  _    _    _    _    _    _    @mse←    @mse↓    _ _   _    _
+  _  _    _    _    _    _    _    _            _         _     _      _
+  _  _    _              _                     _  _   _ _ _ _
+)
+
+
+(defalias
+  ;; https://github.com/kmonad/kmonad/issues/286#issuecomment-898534625
+  notify (cmd-button "echo '1'; notify-send \'test\'")
+  notify2 (cmd-button "echo '1' && echo '2' ; echo '3' ; notify-send -u critical \'test\'; echo '4' ")
+  scr↓ (cmd-button "xdotool click 5; sleep 0.1; TIME=0.1; while true; do xdotool --repeat 10 click 5; sleep $TIME; if (( $(echo '$TIME > 0.02' | bc -l) )); then TIME=$(echo '$TIME - 0.01' | bc); fi done"
+                   "ps aux | grep \'xdotool click 5\' | awk \'{ print $2 }\' | xargs kill")
+  scr↑ (cmd-button "./scripts/scroll-down-hold.sh"
+                   "ps aux | grep \'scroll-down-hold.sh\' | awk \'{ print $2 }\' | xargs kill")
+)
+
+(defalias mse← (cmd-button "./scripts/mouse.sh LEFT" "ps aux | grep \'./scripts/mouse.sh LEFT\' | awk \'{ print $2 }\' | xargs kill")
+)
+(defalias
+  mse→ right
+  mse↑ up
+  mse↓ down
+)
+
+(deflayer layer_altgr
+  a b c d e f g h i j k l m n o
+  r s t u v w x y z a b c d e
+  f a b c d e f g h i j k l m
+  n o p q r s t u v w x  y z
+  a b c d e f g h i j k l
+  m n o p q r s t u v
+)
+
+(deflayer symbols
+  _        _    _    _    _    _    _    _    _    _    _    _    _    _   _
+  _        _    _    _    _    _    _    _    _    _    _    _    _    _
+  _        S-1  S-2  S-3  S-4  S-5  =    7    8    9    +    «    »    _
+  _        \_   [    {    \(   S-6  *    4    5    6    -    _    _
+  _          ]    }    \)   S-7  `    0    1    2    3    /    _
+  _        _    _              _              _    _    _    _ _ _
+)
+
+(deflayer empty
+ _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
+  _   _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _     _    _    _    _    _    _    _    _    _    _    _       _ 
+  _      _    _    _    _    _    _    _    _    _    _        _ 
+  _      _    _              _              _    _    _   _   _   _
+)
+
+
+
+
+
+(defalias
+  ;; Bind keys to layers
+  key_caps  (layer-toggle layer_extend)
+  key_altgr  (layer-toggle layer_altgr)
+
+  ;; the following line activates on press of rctl the layer_rctl and deactivates the layer_hold_alt (if ever activated) on release of rctl. The hold_alt layer is activated in layer_rctl with its own logic 
+  when_releasing_rctl (tap-macro-release #((layer-rem layer_rctl_hold_alt) (release-only lalt)))
+  key_rctl (around (layer-toggle layer_rctl) @when_releasing_rctl)
+)
+
+(defalias
+  cpy C-c
+  pst C-v
+  cut C-x
+  udo C-z
+  all C-a
+  fnd C-f
+  bk Back
+  fw Forward
+  £ S-3  ;;UK pound sign
+  ← left
+  ←← C-left
+  ⇐⇐ home
+  → right
+  →→ C-right
+  ⇒⇒ end
+  ⌫ bspc
+  ⌦ delete
+  ⌫⌫ C-bspc
+  ⌦⌦ C-delete
+  ↑ up
+  ↓ down
+  ⇑⇑ pageup
+  ⇓⇓ pagedown
+  ;;←→⇐⇒↑↓⇑⇓↚↛
+)
+
+
+
+
+(deflayer layer_navend_online
+  _       _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+  _        f1   f2   f3   f4   f5   f6   f7   f8   f9  f10   f11  f12  ret
+  _        esc  @bk  @fnd @fw  ins  pgup home up   end  menu prnt slck _
+  _        @all tab  lsft lctl lalt pgdn lft  down rght del  caps _
+  _          @cut @cpy @pst @pst @udo pgdn bks  f13  f14  comp _
+  _        _    _              ret            _    _ _ _
+)
+
+
+(deflayer test
+  a b c d e f g h i j k l m n o
+  r s t u v w x y z a b c d e
+  f a b c d e f g h i j k l m
+  n o p q r s t u v w x  y z
+  a b c d e f g h i j k l
+  m n o p q r s t u v
+)
+
+
+(deflayer layer_reference_1
+  esc   _   _    _    _   _   _   _    _   _     _    _    _ insert delete
+  grv   1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab    q    w    e    r    t    y    u    i    o    p    [    ]    \
+  _       a    s    d    f    g    h    j    k    l    ;    '   ret
+  lsft     z    x    c    v    b    n    m    ,    .    /    rsft
+  lctl     lmet lalt          spc             _  rctl   left up down right
+)
+
+(deflayer layer_navigation_1
+  esc   _   _    _    _   _   _   _    _   _     _    _    _ insert delete
+  grv   1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab    q    w    e    r    t    y   @⇑⇑   @↑   @↓   @⇓⇓  [    ]    \
+  _       a    s    d    f    g    @⇐⇐  @←←  @←   @→   @→→  @⇒⇒  _
+  lsft     z    x    c    v    b    n    @⌫⌫  @⌫   @⌦  @⌦⌦  rsft
+  lctl     lmet lalt          spc                   _  rctl   left up down right
+)
+
+(deflayer layer_navigation_2
+  esc   _   _    _    _   _   _   _    _   _     _    _    _ insert delete
+  grv   1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab    q    w    e    r    t    y    @⇑⇑  @⇐⇐  @↑   @⇒⇒  @⇓⇓    ]    \
+  _       a    s    d    f    g    h    @←←  @←   @↓   @→   @→→    _
+  lsft     z    x    c    v    b    n    @⌫⌫  @⌫   _    @⌦   @⌦⌦
+  lctl     lmet lalt          spc                   _   rctl   left up down right
+)
+
+(deflayer layer_navigation_3
+  esc   _   _    _    _   _   _   _    _   _     _    _    _ insert delete
+  grv   1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab    q    w    e    r    t    y    @⇑⇑  @⇐⇐  @↑   @⇒⇒  _    ]    \
+  _       a    s   lsft lctl g    h    @⇓⇓  @←   @↓   @→   _    _
+  lsft     z    x    c    v    b    n    @⌫⌫  @⌫   _    @⌦   @⌦⌦
+  lctl     lmet lalt          spc                   _   rctl   left up down right
+)
+
+(deflayer layer_extend
+  esc   _   _    _    _   _   _   _    _   _     _    _    _ insert delete
+  grv   1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab    @⇑⇑  @⌫   @↑   @⌦  @⇓⇓   y    _    _    _   _     _    ]    \
+  _       @⇐⇐  @←   @↓   @→   @⇒⇒  h    _     _   _   _     _        _
+  lsft     z    x    c    v    b    n    _     _   _   _             _
+  lctl     lmet lalt          spc                   _   rctl   left up down right
+)
+
+(defalias
+  ;; https://github.com/kmonad/kmonad/issues/593#issuecomment-1190230580
+  aux_rctl_alt #((press-only lalt) (layer-add layer_rctl_hold_alt) tab)
+)
+
+(deflayer layer_rctl
+  _  _    _    _    _    _    _    _    _    _    _    _    _    _  _
+  _  _    _    _    _    _    _    _    _    _    _    @scr↑    _    _
+  _  _    _    _    _    _    _    _    _    _    @scr↓    _    _    _
+  _  _    _    _    _    _    _    _    _    _    _    _    _ 
+  _  _    _    _    _    _    _    _    @aux_rctl_alt  @aux_rctl_alt  _  _   
+  _  _    _              _              _    _        _ _ _ _
+)
+
+(deflayer layer_rctl_hold_alt
+  _  _    _    _    _    _    _    _    _    _    _    _    _    _  _
+  _  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _  _    _    _    _    _    _    _    _    _    _    _    _ 
+  _  _    _    _    _    _    _    _    S-tab    tab      _      _ 
+  _  _    _              _              _    _        _ _ _ _
+)

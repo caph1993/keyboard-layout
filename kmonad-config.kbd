@@ -1,0 +1,188 @@
+(defcfg
+  ;; ** For Linux **
+
+  ;; input  (device-file "/dev/input/by-path/platform-i8042-serio-0-event-kbd") ;; laptop
+  ;; input  (device-file "/dev/input/by-path/pci-0000:00:14.0-usb-0:3.2:1.0-event-kbd") ;; office flat
+  input (device-file "/dev/input/by-path/pci-0000:00:14.0-usb-0:3.1.2:1.0-event-kbd");; Frank
+
+  ;; input  (device-file "/dev/input/by-path/pci-0000:00:14.0-usbv2-0:3.2:1.0-event-kbd") ;; 
+  ;; input  (device-file "/dev/input/by-path/platform-i8042-serio-0-event-kbd") ;; 
+  ;; input  (device-file "/dev/input/by-id/usb-Matias_Ergo_Pro_Keyboard-event-kbd") ;; example
+  
+  output (uinput-sink "KMonad output")
+
+  ;; ** For Windows **
+  ;; input  (low-level-hook)
+  ;; output (send-event-sink)
+
+  ;; ** For MacOS **
+  ;; input  (iokit-name "my-keyboard-product-string")
+  ;; output (kext)
+
+  fallthrough true
+  allow-cmd true
+)
+
+(defsrc
+  esc  f1  f2   f3  f4   f5  f6   f7  f8   f9 f10  f11  f12 insert delete
+  grv   1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab    q    w    e    r    t    y    u    i    o    p    [    ]    \
+  caps    a    s    d    f    g    h    j    k    l    ;    '   ret
+  lsft     z    x    c    v    b    n    m    ,    .    /    rsft
+  lctl   lmet lalt          spc         ralt rctl   left up down right
+)
+
+(deflayer main
+  _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
+  @` @1    @2    _   _    _    _    _    _    _    _    @-   @=   _
+  _    _    _    _    _    _    _    _    _    _    _    _    _   _
+  _     _    _    _    _    _    _    _    _    _    _    _       _ 
+  @lsft  _    _    _    _    _    _    _    _    _    _       @rsft 
+  _      _    _              _              _    _    _   _   _   _
+)
+
+(deflayer empty-for-reference
+  _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
+  _   _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _   _
+  _     _    _    _    _    _    _    _    _    _    _    _       _ 
+  _      _    _    _    _    _    _    _    _    _    _           _ 
+  _      _    _              _              _    _    _   _   _   _
+)
+(defalias lsft (around lsft (layer-toggle numbers)))
+(defalias rsft (around rsft (layer-toggle numbers)))
+(deflayer numbers
+  _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
+  grv 1    2    3    4    5    6    7    8    9    0    -    = bspc
+  _    _    _    _    _    _    _    _    _    _    _    _    _   _
+  _     _    _    _    _    _    _    _    _    _    _    _       _ 
+  _      _    _    _    _    _    _    _    _    _    _           _ 
+  _      _    _              _              _    _    _   _   _   _
+)
+(defalias - (tap-hold-next-release 200 - (layer-toggle numbers-only)))
+(deflayer numbers-only
+  _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
+  grv 1    2    3    4    5    6    7    8    9    0    -    = bspc
+  _    XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX  _
+  _     XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX      _ 
+  _      XX   XX   XX   XX   XX   XX   XX   XX   XX   XX          _ 
+  _      _    _              _              _    _    _   _   _   _
+)
+
+;; ---------------------------------------------
+;; grv on press, lctl on hold
+(defalias ` (tap-hold-next-release 200 ` (around lalt (layer-toggle hold-1))))
+(defalias 1 (tap-hold-next-release 200 1 (around lctl (layer-toggle hold-1))))
+(defalias 2 (tap-hold-next-release 200 2 (around lsft (layer-toggle hold-1))))
+(deflayer hold-1
+  _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
+  _   _    _    XX  tab  esc   _    _    _   ret   _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _   _
+  _     _    _    _    _    _    _    _    _    _    _    _       _ 
+  _      _    _    _    _    _    _    _    _    _    _           _ 
+  _      _    _              lsft           _    _    _   _   _   _
+)
+
+;; ---------------------------------------------
+
+(defalias = (tap-hold-next-release 200 = (layer-toggle arrows)))
+(deflayer arrows
+  _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
+  _   _   lsft  _    _   esc  _    XX   @⇑⇑  ret   XX  _    _    _
+  _   C-q  C-w  C-e  C-r  C-t  C-y  bspc  @↑   @→   @⇒⇒  _    _   _
+  _    C-a  C-s  C-d  C-f   _    @⇐⇐  @←   @↓   XX    _   _       _ 
+  _     C-z  C-x  C-c  C-v   _   delete XX @⇓⇓  XX    _           _ 
+  _      _    _              lsft           @mse _    _   _   _   _
+)
+
+(defalias mse (layer-toggle mouse))
+(deflayer mouse
+  _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
+  _   _    _    _    _    _  @mclk  _  @scr↑  _    _    _    _    _
+  _    _    _    _    _    _    _    _  @mse↑ @mse→ _    _    _   _
+  _     _    _    _    _    _    _  @mse← @mse↓ _    _    _       _ 
+  _      _    _    _    _    _ @lclk @rclk @scr↑ _    _           _ 
+  _      _    _              _              _    _    _   _   _   _
+)
+
+;; https://github.com/kmonad/kmonad/issues/286#issuecomment-898534625
+
+(defalias lclk (cmd-button "xdotool click 1"))
+(defalias mclk (cmd-button "xdotool click 2"))
+(defalias rclk (cmd-button "xdotool click 3"))
+
+(defalias
+  notify (cmd-button "echo '1'; notify-send \'test\'")
+  notify2 (cmd-button "echo '1' && echo '2' ; echo '3' ; notify-send -u critical \'test\'; echo '4' ")
+  old-scr↓ (cmd-button "xdotool click 5; sleep 0.1; TIME=0.1; while true; do xdotool --repeat 10 click 5; sleep $TIME; if (( $(echo '$TIME > 0.02' | bc -l) )); then TIME=$(echo '$TIME - 0.01' | bc); fi done"
+                   "ps aux | grep \'xdotool click 5\' | awk \'{ print $2 }\' | xargs kill")
+  old-scr↑ (cmd-button "./scripts/scroll-down-hold.sh"
+                   "ps aux | grep \'scroll-down-hold.sh\' | awk \'{ print $2 }\' | xargs kill")
+)
+
+(defalias mse← (cmd-button "./mouse.sh left" "ps aux | grep \'./mouse.sh left\' | awk \'{ print $2 }\' | xargs kill"))
+(defalias mse→ (cmd-button "./mouse.sh right" "ps aux | grep \'./mouse.sh right\' | awk \'{ print $2 }\' | xargs kill"))
+(defalias mse↑ (cmd-button "./mouse.sh up" "ps aux | grep \'./mouse.sh up\' | awk \'{ print $2 }\' | xargs kill"))
+(defalias mse↓ (cmd-button "./mouse.sh down" "ps aux | grep \'./mouse.sh down\' | awk \'{ print $2 }\' | xargs kill"))
+
+(defalias scr← (cmd-button "./mouse.sh scroll-left" "ps aux | grep \'./mouse.sh scroll-left\' | awk \'{ print $2 }\' | xargs kill"))
+(defalias scr→ (cmd-button "./mouse.sh scroll-right" "ps aux | grep \'./mouse.sh scroll-right\' | awk \'{ print $2 }\' | xargs kill"))
+(defalias scr↑ (cmd-button "./mouse.sh scroll-up" "ps aux | grep \'./mouse.sh scroll-up\' | awk \'{ print $2 }\' | xargs kill"))
+(defalias scr↓ (cmd-button "./mouse.sh scroll-down" "ps aux | grep \'./mouse.sh scroll-down\' | awk \'{ print $2 }\' | xargs kill"))
+
+
+
+
+;; ---------------------------------------------
+
+
+;; My natural right hand position when typing text is the following:
+;; index finger on the joint (J,N,M)
+;; middle finger on the (I)
+;; anular finger on the (O)
+;; pinky finger on the ([)
+;; thumb finger on the laptop, below (ralt) and unable to reach it comfortably, but with the tip over the (space bar)
+
+;; My natural right hand position when typing text is the following:
+;; index finger on (f)
+;; middle finger on the joint (r,4)
+;; anular finger on the joint (3,e)
+;; pinky finger on the joint (1,tab,q)
+;; thumb finger symmetric to the left, below (lalt) unable to reach it comfortably, but with the tip over the (space bar)
+
+;; jiko
+;; erdf
+;; 
+;; Activate with (q hold then w) deactivate with (q)
+;; Activate with ([ hold then p) deactivate with ([)
+;; backspace with (t) and (u), with the thumb
+;; ctrl with (space bar), with the thumb
+;; alt with (lalt) and (ralt), with the thumb
+;; @fn with (rctl) and (super) with the thumb
+;; 
+;; shift with (w) and (p), with the pinky
+;; tab with (g) and (h)
+;; 
+;; @enter_navigation with (b)
+;; Shortcuts ctrl c v x z y.
+
+
+(defalias
+  bk Back
+  fw Forward
+  ← left
+  ←← C-left
+  ⇐⇐ home
+  → right
+  →→ C-right
+  ⇒⇒ end
+  ⌫ bspc
+  ⌦ delete
+  ⌫⌫ C-bspc
+  ⌦⌦ C-delete
+  ↑ up
+  ↓ down
+  ⇑⇑ pageup
+  ⇓⇓ pagedown
+  ;;←→⇐⇒↑↓⇑⇓↚↛
+)
