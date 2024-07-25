@@ -1,0 +1,11 @@
+#!/bin/bash
+
+TARGET_USER=$(logname)
+
+if [[ $EUID -ne 0 ]]; then
+   sudo -u $TARGET_USER -H "$0" "$@"
+   exit
+fi
+
+SCRIPT_DIR="$(dirname "$(realpath "$0")")"
+sudo "$SCRIPT_DIR/kmonad" "$@"

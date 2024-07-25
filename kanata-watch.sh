@@ -6,12 +6,12 @@
 SCRIPT_DIR="$(dirname "$(realpath "$0")")"
 
 cd "$SCRIPT_DIR"
-KMONAD=""$SCRIPT_DIR/kmonad" --allow-cmd $@"
-CONFIG_FILE="$SCRIPT_DIR/kmonad-config.kbd"
-BACKUP_FILE="$SCRIPT_DIR/kmonad-backup.kbd"
-LOG_FILE="$SCRIPT_DIR/kmonad-log.log"
+COMMAND=""$SCRIPT_DIR/kanata" $@"
+CONFIG_FILE="$SCRIPT_DIR/kanata-config.kbd"
+BACKUP_FILE="$SCRIPT_DIR/kanata-backup.kbd"
+LOG_FILE="$SCRIPT_DIR/kanata-log.log"
 
-A1=""$KMONAD" "$CONFIG_FILE""
+A1=""$COMMAND" --cfg "$CONFIG_FILE""
 A2="cp "$CONFIG_FILE" "$BACKUP_FILE""
 # Assign the command to a variable
 A='
@@ -36,7 +36,7 @@ A1_EXIT_CODE=$?;
 wait $A2_PID;
 exit $A1_EXIT_CODE
 )'
-B1=""$KMONAD" "$BACKUP_FILE""
+B1=""$COMMAND" --cfg "$BACKUP_FILE""
 B="(echo \"BACKUP: '$B1'\"; eval '$B1')"
 
 echo "$CONFIG_FILE" | entr -r sh -c "$A || $B"

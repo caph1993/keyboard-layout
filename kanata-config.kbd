@@ -1,30 +1,10 @@
+
 (defcfg
-  ;; ** For Linux **
-
-  input  (device-file "/dev/input/by-path/platform-i8042-serio-0-event-kbd") ;; laptop
-  ;; input  (device-file "/dev/input/by-path/pci-0000:00:14.0-usb-0:3.2:1.0-event-kbd") ;; office flat
-  ;; input (device-file "/dev/input/by-path/pci-0000:00:14.0-usb-0:3.1.2:1.0-event-kbd");; Frank
-
-  ;; input  (device-file "/dev/input/by-path/pci-0000:00:14.0-usbv2-0:3.2:1.0-event-kbd") ;; 
-  ;; input  (device-file "/dev/input/by-path/platform-i8042-serio-0-event-kbd") ;; 
-  ;; input  (device-file "/dev/input/by-id/usb-Matias_Ergo_Pro_Keyboard-event-kbd") ;; example
-  
-  output (uinput-sink "KMonad output")
-
-  ;; ** For Windows **
-  ;; input  (low-level-hook)
-  ;; output (send-event-sink)
-
-  ;; ** For MacOS **
-  ;; input  (iokit-name "my-keyboard-product-string")
-  ;; output (kext)
-
-  fallthrough true
-  allow-cmd true
+  danger-enable-cmd yes
+  movemouse-inherit-accel-state yes
 )
-
 (defsrc
-  esc  f1  f2   f3  f4   f5  f6   f7  f8   f9 f10  f11  f12 insert delete
+  esc  f1  f2   f3  f4   f5  f6   f7  f8   f9 f10  f11  f12 ins del
   grv   1    2    3    4    5    6    7    8    9    0    -    =    bspc
   tab    q    w    e    r    t    y    u    i    o    p    [    ]    \
   caps    a    s    d    f    g    h    j    k    l    ;    '   ret
@@ -49,8 +29,8 @@
   _      _    _    _    _    _    _    _    _    _    _           _ 
   _      _    _              _              _    _    _   _   _   _
 )
-(defalias lsft (around lsft (layer-toggle numbers)))
-(defalias rsft (around rsft (layer-toggle numbers)))
+(defalias lsft (multi lsft (layer-while-held numbers)))
+(defalias rsft (multi rsft (layer-while-held numbers)))
 (deflayer numbers
   _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
   grv 1    2    3    4    5    6    7    8    9    0    -    = bspc
@@ -59,7 +39,7 @@
   _      _    _    _    _    _    _    _    _    _    _           _ 
   _      _    _              _              _    _    _   _   _   _
 )
-(defalias - (tap-hold-next-release 200 - (layer-toggle numbers-only)))
+(defalias - (tap-hold-release 200 200 - (layer-while-held numbers-only)))
 (deflayer numbers-only
   _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
   grv 1    2    3    4    5    6    7    8    9    0    -    = bspc
@@ -71,9 +51,9 @@
 
 ;; ---------------------------------------------
 ;; grv on press, lctl on hold
-(defalias ` (tap-hold-next-release 200 ` (around lctl (layer-toggle hold-1))))
-(defalias 1 (tap-hold-next-release 200 1 (around lctl (layer-toggle hold-1))))
-(defalias 2 (tap-hold-next-release 200 2 (around lsft (layer-toggle hold-1))))
+(defalias ` (tap-hold-release 200 200 ` (multi lctl (layer-while-held hold-1))))
+(defalias 1 (tap-hold-release 200 200 1 (multi lctl (layer-while-held hold-1))))
+(defalias 2 (tap-hold-release 200 200 2 (multi lsft (layer-while-held hold-1))))
 (deflayer hold-1
   _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
   _   _    _    XX  tab  esc   _    _    _   ret   _    _    _    _
@@ -83,7 +63,7 @@
   _      _    _              lsft           _    _    _   _   _   _
 )
 
-(defalias lalt (around lalt (layer-toggle hold-lalt)))
+(defalias lalt (multi lalt (layer-while-held hold-lalt)))
 (deflayer hold-lalt
   _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
   _   _    _    XX  tab  esc   _    _    _   ret   _    _    _    _
@@ -93,56 +73,42 @@
   _      _    _              lsft           _    _    @noA-home _  _ @noA-end
 )
 
-(defalias noA-home (tap-macro-release (release-only lalt) home (press-only lalt)))
-(defalias noA-end (tap-macro-release (release-only lalt) end (press-only lalt)))
+(defalias noA-home (multi (release-key lalt) home))
+(defalias noA-end (multi (release-key lalt) end))
 
 
 ;; ---------------------------------------------
 
-(defalias = (tap-hold-next-release 200 = (layer-toggle arrows)))
+(defalias = (tap-hold-release 200 200 = (layer-while-held arrows)))
 (deflayer arrows
   _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
-  _   _   lsft  _    _   esc  _    @⇑⇑  XX  ret   XX   _    _    _
-  _   C-q  C-w  C-e  C-r  C-t  C-y  bspc  @↑   @→    XX  _    _   _
-  _    C-a  C-s  C-d  C-f   _    @⇐⇐  @←   @↓   XX   @⇒⇒  _       _ 
-  _     C-z  C-x  C-c  C-v   _   delete XX @⇓⇓  XX    _           _ 
+  _   _   lsft  _    _   esc  _      ⇞  XX  ret   XX   _    _    _
+  _   C-q  C-w  C-e  C-r  C-t  C-y  bspc  ▲    ▶    XX  _    _   _
+  _    C-a  C-s  C-d  C-f   _    ⇤    ◀    ▼   XX   ⇥   _       _ 
+  _     C-z  C-x  C-c  C-v   _    del  XX   ⇟   XX    _           _ 
   _      _    _              lsft           @mse _    _   _   _   _
 )
 
-(defalias mse (layer-toggle mouse))
+(defalias mse (layer-while-held mouse))
 (deflayer mouse
   _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
-  _   _    _    _    _    _  @mclk  _  @scr↑  _    _    _    _    _
-  _    _    _    _    _    _    _    _  @mse↑ @mse→ _    _    _   _
-  _     _    _    _    _    _    _  @mse← @mse↓ _    _    _       _ 
-  _      _    _    _    _    _ @lclk @rclk @scr↑ _    _           _ 
+  _   _    _    _    _    _   🖰3    _  @🖱☸↑  _    _    _    _    _
+  _    _    _    _    _    _    _    _  @🖱↑   @🖱→   _    _    _   _
+  _     _    _    _    _    _    _   @🖱←  @🖱↓   _    _    _       _ 
+  _      _    _    _    _    _   ‹🖰   🖰›  @🖱☸↓ _    _           _ 
   _      _    _              _              _    _    _   _   _   _
 )
 
-;; https://github.com/kmonad/kmonad/issues/286#issuecomment-898534625
-
-(defalias lclk (cmd-button "xdotool click 1"))
-(defalias mclk (cmd-button "xdotool click 2"))
-(defalias rclk (cmd-button "xdotool click 3"))
-
 (defalias
-  notify (cmd-button "echo '1'; notify-send \'test\'")
-  notify2 (cmd-button "echo '1' && echo '2' ; echo '3' ; notify-send -u critical \'test\'; echo '4' ")
-  old-scr↓ (cmd-button "xdotool click 5; sleep 0.1; TIME=0.1; while true; do xdotool --repeat 10 click 5; sleep $TIME; if (( $(echo '$TIME > 0.02' | bc -l) )); then TIME=$(echo '$TIME - 0.01' | bc); fi done"
-                   "ps aux | grep \'xdotool click 5\' | awk \'{ print $2 }\' | xargs kill")
-  old-scr↑ (cmd-button "./scripts/scroll-down-hold.sh"
-                   "ps aux | grep \'scroll-down-hold.sh\' | awk \'{ print $2 }\' | xargs kill")
+  🖱↑  (🖱↑  1 1)
+  🖱→ (🖱→ 1 1)
+  🖱← (🖱← 1 1)
+  🖱↓ (🖱↓ 1 1)
+  🖱☸↑ (🖱☸↑ 25 60)
+  🖱☸↓ (🖱☸↓ 25 60)
 )
 
-(defalias mse← (cmd-button "./mouse.sh left" "ps aux | grep \'./mouse.sh left\' | awk \'{ print $2 }\' | xargs kill"))
-(defalias mse→ (cmd-button "./mouse.sh right" "ps aux | grep \'./mouse.sh right\' | awk \'{ print $2 }\' | xargs kill"))
-(defalias mse↑ (cmd-button "./mouse.sh up" "ps aux | grep \'./mouse.sh up\' | awk \'{ print $2 }\' | xargs kill"))
-(defalias mse↓ (cmd-button "./mouse.sh down" "ps aux | grep \'./mouse.sh down\' | awk \'{ print $2 }\' | xargs kill"))
-
-(defalias scr← (cmd-button "./mouse.sh scroll-left" "ps aux | grep \'./mouse.sh scroll-left\' | awk \'{ print $2 }\' | xargs kill"))
-(defalias scr→ (cmd-button "./mouse.sh scroll-right" "ps aux | grep \'./mouse.sh scroll-right\' | awk \'{ print $2 }\' | xargs kill"))
-(defalias scr↑ (cmd-button "./mouse.sh scroll-up" "ps aux | grep \'./mouse.sh scroll-up\' | awk \'{ print $2 }\' | xargs kill"))
-(defalias scr↓ (cmd-button "./mouse.sh scroll-down" "ps aux | grep \'./mouse.sh scroll-down\' | awk \'{ print $2 }\' | xargs kill"))
+;; https://github.com/kmonad/kmonad/issues/286#issuecomment-898534625
 
 
 
@@ -180,23 +146,69 @@
 ;; @enter_navigation with (b)
 ;; Shortcuts ctrl c v x z y.
 
-
+(deflayer greek-lower
+  _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
+  _   _    _    _    _    _    _    _    _    _    _    _    _    _
+  _   @ψ   @ω   @ε   @ρ   @τ   @υ   @υ   @ι   @ο   @π    _    _   _
+  _    @α   @σ   @δ   @φ   @γ   @η   @ξ   @κ   @λ    _    _       _ 
+  _     @ζ   @χ   @ψ   @ω   @β   @ν   @μ    _    _    _           _ 
+  _      _    _              _              _    _    _   _   _   _
+)
+(deflayer greek-uppercase
+  _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
+  _   _    _    _    _    _    _    _    _    _    _    _    _    _
+  _   @Ψ   @΅   @Ε   @Ρ   @Τ   @Υ   @Θ   @Ι   @Ο   @Π    _    _   _
+  _    @Α   @Σ   @Δ   @Φ   @Γ   @Η   @Ξ   @Κ   @Λ    _    _       _ 
+  _     @Ζ   @Χ   @Ψ   @Ω   @Β   @Ν   @Μ    _    _    _           _ 
+  _      _    _              _              _    _    _   _   _   _
+)
 (defalias
-  bk Back
-  fw Forward
-  ← left
-  ←← C-left
-  ⇐⇐ home
-  → right
-  →→ C-right
-  ⇒⇒ end
-  ⌫ bspc
-  ⌦ delete
-  ⌫⌫ C-bspc
-  ⌦⌦ C-delete
-  ↑ up
-  ↓ down
-  ⇑⇑ pageup
-  ⇓⇓ pagedown
-  ;;←→⇐⇒↑↓⇑⇓↚↛
+  ψ (unicode ψ)
+  ω (unicode ω)
+  ε (unicode ε)
+  ρ (unicode ρ)
+  τ (unicode τ)
+  υ (unicode υ)
+  ι (unicode ι)
+  ο (unicode ο)
+  π (unicode π)
+  α (unicode α)
+  σ (unicode σ)
+  δ (unicode δ)
+  φ (unicode φ)
+  γ (unicode γ)
+  η (unicode η)
+  ξ (unicode ξ)
+  κ (unicode κ)
+  λ (unicode λ)
+  ζ (unicode ζ)
+  χ (unicode χ)
+  β (unicode β)
+  ν (unicode ν)
+  μ (unicode μ)
+  ΅ (unicode ΅)
+  Ε (unicode Ε)
+  Ρ (unicode Ρ)
+  Τ (unicode Τ)
+  Υ (unicode Υ)
+  Θ (unicode Θ)
+  Ι (unicode Ι)
+  Ο (unicode Ο)
+  Π (unicode Π)
+  Α (unicode Α)
+  Σ (unicode Σ)
+  Δ (unicode Δ)
+  Φ (unicode Φ)
+  Γ (unicode Γ)
+  Η (unicode Η)
+  Ξ (unicode Ξ)
+  Κ (unicode Κ)
+  Λ (unicode Λ)
+  Ζ (unicode Ζ)
+  Χ (unicode Χ)
+  Ψ (unicode Ψ)
+  Ω (unicode Ω)
+  Β (unicode Β)
+  Ν (unicode Ν)
+  Μ (unicode Μ)
 )
