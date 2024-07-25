@@ -2,6 +2,7 @@
 (defcfg
   danger-enable-cmd yes
   movemouse-inherit-accel-state yes
+  movemouse-smooth-diagonals yes
 )
 (defsrc
   esc  f1  f2   f3  f4   f5  f6   f7  f8   f9 f10  f11  f12 ins del
@@ -14,7 +15,7 @@
 
 (deflayer main
   _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
-  @` @1    @2    _   _    _    _    _    _    _    _    @-   @=   _
+  @`  @1  @2    _   _    _    _    _    _    _    _    @-   @=   _
   _    _    _    _    _    _    _    _    _    _    _    _    _   _
   _     _    _    _    _    _    _    _    _    _    _    _       _ 
   @lsft  _    _    _    _    _    _    _    _    _    _       @rsft 
@@ -51,30 +52,56 @@
 
 ;; ---------------------------------------------
 ;; grv on press, lctl on hold
-(defalias ` (tap-hold-release 200 200 ` (multi lctl (layer-while-held hold-1))))
 (defalias 1 (tap-hold-release 200 200 1 (multi lctl (layer-while-held hold-1))))
 (defalias 2 (tap-hold-release 200 200 2 (multi lsft (layer-while-held hold-1))))
 (deflayer hold-1
   _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
-  _   _    _    XX  tab  esc   _    _    _   ret   _    _    _    _
+  _   _    _   _  tab  esc   _    _    _   ret   _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _   _
   _     _    _    _    _    _    _    _    _    _    _    _       _ 
   _      _    _    _    _    _    _    _    _    _    _           _ 
   _      _    _              lsft           _    _    _   _   _   _
 )
-
 (defalias lalt (multi lalt (layer-while-held hold-lalt)))
 (deflayer hold-lalt
   _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
-  _   _    _    XX  tab  esc   _    _    _   ret   _    _    _    _
+  _   _    _    _   tab  esc   _    _    _   ret   _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _   _
   _     _    _    _    _    _    _    _    _    _    _    _       _ 
   _      _    _    _    _    _    _    _    _    _    _           _ 
   _      _    _              lsft           _    _    @noA-home _  _ @noA-end
 )
 
-(defalias noA-home (multi (release-key lalt) home))
-(defalias noA-end (multi (release-key lalt) end))
+(defalias ` (tap-hold-release 200 200 ` (multi (layer-while-held hold-`) (on-release release-vkey vkey-`3) (on-release release-vkey vkey-greek) (on-release release-vkey vkey-math) )))
+(deflayer hold-`
+  _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
+  _   _    _    @`3  tab  esc   _    _    _   ret   _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _   _
+  _     _    _    _    _    _    _    _    _    _    _    _       _ 
+  _      _    _    _    _    _    _    _    _    _    _           _ 
+  _      _    _              lsft           _    _    @noA-home _  _ @noA-end
+)
+(defalias noA-home (unmod home))
+(defalias noA-end (unmod end))
+
+(defalias `3 (multi (layer-while-held hold-`) (on-press press-vkey vkey-`3) (tap-hold-release 200 200 XX (multi lalt))))
+(defvirtualkeys vkey-`3 (layer-while-held 3actions))
+(deflayer 3actions
+  _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
+  _   _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _  @term  _    _    _    _    _    _    _    _   _
+  _     _    _    _    _  @greek _    _    _    _    _    _       _ 
+  _      _    _    _    _    _    _   @math  _    _    _           _ 
+  _      _    _            @albert           _    _    _   _   _   _
+)
+
+(defalias term M-F3)
+(defalias albert M-spc)
+
+(defoverrides
+  (lsft bspc) (del)
+  (lsft del) (bspc)
+)
 
 
 ;; ---------------------------------------------
@@ -86,31 +113,39 @@
   _   C-q  C-w  C-e  C-r  C-t  C-y  bspc  ▲    ▶    XX  _    _   _
   _    C-a  C-s  C-d  C-f   _    ⇤    ◀    ▼   XX   ⇥   _       _ 
   _     C-z  C-x  C-c  C-v   _    del  XX   ⇟   XX    _           _ 
-  _      _    _              lsft           @mse _    _   _   _   _
+  _      _    @mse           lsft           _    _    _   _   _   _
 )
 
 (defalias mse (layer-while-held mouse))
 (deflayer mouse
   _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
   _   _    _    _    _    _   🖰3    _  @🖱☸↑  _    _    _    _    _
-  _    _    _    _    _    _    _    _  @🖱↑   @🖱→   _    _    _   _
+  _    _    _    _    _    _    _    _   @🖱↑  @🖱→   _    _    _   _
   _     _    _    _    _    _    _   @🖱←  @🖱↓   _    _    _       _ 
   _      _    _    _    _    _   ‹🖰   🖰›  @🖱☸↓ _    _           _ 
-  _      _    _              _              _    _    _   _   _   _
+  _      _    _    (layer-while-held slow-mouse) _    _    _   _   _   _
+)
+(deflayer slow-mouse
+  _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
+  _   _    _    _    _    _   _     _   _     _    _    _    _    _
+  _    _    _    _    _    _    _    _   @🖱s↑  @🖱s→   _    _    _   _
+  _     _    _    _    _    _    _   @🖱s←  @🖱s↓   _    _    _       _ 
+  _      _    _    _    _    _   _    _     _    _    _           _ 
+  _      _    _    (layer-while-held slow-mouse)      _    _    _   _   _   _
 )
 
 (defalias
-  🖱↑  (🖱↑  1 1)
-  🖱→ (🖱→ 1 1)
-  🖱← (🖱← 1 1)
-  🖱↓ (🖱↓ 1 1)
+  🖱↑  (🖱↑ 3 3)
+  🖱→  (🖱→ 3 3)
+  🖱←  (🖱← 3 3)
+  🖱↓  (🖱↓ 3 3)
+  🖱s↑ (🖱↑ 3 1)
+  🖱s→ (🖱→ 3 1)
+  🖱s← (🖱← 3 1)
+  🖱s↓ (🖱↓ 3 1)
   🖱☸↑ (🖱☸↑ 25 60)
   🖱☸↓ (🖱☸↓ 25 60)
 )
-
-;; https://github.com/kmonad/kmonad/issues/286#issuecomment-898534625
-
-
 
 
 ;; ---------------------------------------------
@@ -146,69 +181,50 @@
 ;; @enter_navigation with (b)
 ;; Shortcuts ctrl c v x z y.
 
+
+(defvirtualkeys vkey-greek (layer-while-held greek-lower))
+(defalias greek (on-press press-vkey vkey-greek))
 (deflayer greek-lower
   _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
-  _   _    _    _    _    _    _    _    _    _    _    _    _    _
-  _   @ψ   @ω   @ε   @ρ   @τ   @υ   @υ   @ι   @ο   @π    _    _   _
-  _    @α   @σ   @δ   @φ   @γ   @η   @ξ   @κ   @λ    _    _       _ 
-  _     @ζ   @χ   @ψ   @ω   @β   @ν   @μ    _    _    _           _ 
+  _   _   @⇧gr  _    _    _    _    _    _    _    _    _    _    _
+  _   🔣ψ   🔣ω   🔣ε   🔣ρ   🔣τ   🔣υ   🔣υ   🔣ι   🔣ο   🔣π    _    _   _
+  _    🔣α   🔣σ   🔣δ   🔣φ   🔣γ   🔣η   🔣ξ   🔣κ   🔣λ    _    _       _ 
+  @⇧gr  🔣ζ   🔣χ   🔣ψ   🔣ω   🔣β   🔣ν   🔣μ    _    _    _           @⇧gr 
   _      _    _              _              _    _    _   _   _   _
 )
-(deflayer greek-uppercase
+(defalias ⇧gr (layer-while-held greek-upper))
+(deflayer greek-upper
   _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
   _   _    _    _    _    _    _    _    _    _    _    _    _    _
-  _   @Ψ   @΅   @Ε   @Ρ   @Τ   @Υ   @Θ   @Ι   @Ο   @Π    _    _   _
-  _    @Α   @Σ   @Δ   @Φ   @Γ   @Η   @Ξ   @Κ   @Λ    _    _       _ 
-  _     @Ζ   @Χ   @Ψ   @Ω   @Β   @Ν   @Μ    _    _    _           _ 
+  _   🔣Ψ   🔣΅   🔣Ε   🔣Ρ   🔣Τ   🔣Υ   🔣Θ   🔣Ι   🔣Ο   🔣Π    _    _   _
+  _    🔣Α   🔣Σ   🔣Δ   🔣Φ   🔣Γ   🔣Η   🔣Ξ   🔣Κ   🔣Λ    _    _       _ 
+  _     🔣Ζ   🔣Χ   🔣Ψ   🔣Ω   🔣Β   🔣Ν   🔣Μ    _    _    _           _ 
   _      _    _              _              _    _    _   _   _   _
 )
-(defalias
-  ψ (unicode ψ)
-  ω (unicode ω)
-  ε (unicode ε)
-  ρ (unicode ρ)
-  τ (unicode τ)
-  υ (unicode υ)
-  ι (unicode ι)
-  ο (unicode ο)
-  π (unicode π)
-  α (unicode α)
-  σ (unicode σ)
-  δ (unicode δ)
-  φ (unicode φ)
-  γ (unicode γ)
-  η (unicode η)
-  ξ (unicode ξ)
-  κ (unicode κ)
-  λ (unicode λ)
-  ζ (unicode ζ)
-  χ (unicode χ)
-  β (unicode β)
-  ν (unicode ν)
-  μ (unicode μ)
-  ΅ (unicode ΅)
-  Ε (unicode Ε)
-  Ρ (unicode Ρ)
-  Τ (unicode Τ)
-  Υ (unicode Υ)
-  Θ (unicode Θ)
-  Ι (unicode Ι)
-  Ο (unicode Ο)
-  Π (unicode Π)
-  Α (unicode Α)
-  Σ (unicode Σ)
-  Δ (unicode Δ)
-  Φ (unicode Φ)
-  Γ (unicode Γ)
-  Η (unicode Η)
-  Ξ (unicode Ξ)
-  Κ (unicode Κ)
-  Λ (unicode Λ)
-  Ζ (unicode Ζ)
-  Χ (unicode Χ)
-  Ψ (unicode Ψ)
-  Ω (unicode Ω)
-  Β (unicode Β)
-  Ν (unicode Ν)
-  Μ (unicode Μ)
+
+(defvirtualkeys vkey-math (layer-while-held math))
+(defalias math (on-press press-vkey vkey-math))
+(deflayer math
+  _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
+  _   _    _    _    _    _    _    _    _    _    _    _    _    _
+  _   🔣ψ   🔣ω   🔣ε   🔣ρ   🔣τ   🔣υ   🔣υ   🔣ι   🔣ο   🔣π    _    _   _
+  _    🔣α   🔣σ   🔣δ   🔣φ   🔣γ   🔣η   🔣ξ   🔣κ   🔣λ    _    _       _ 
+  _     🔣ζ   🔣χ   🔣ψ   🔣ω   🔣β   🔣ν   🔣μ    _    _    _           _ 
+  _      _    _              _              _    _    _   _   _   _
+)
+
+(defseq
+    dotcom (. S-3)
+    dotorg (. S-4)
+
+    ;;     The shifted letters in parentheses means a single press of lsft
+    ;;     must remain held while both h and then s are pressed.
+    ;;     This is not the same as S-h S-s, which means that the lsft key
+    ;;     must be released and repressed between the h and s presses.
+    https (S-(h s))
+)
+(defvirtualkeys
+    dotcom (macro . c o m)
+    dotorg (macro . o r g)
+    https (macro h t t p s S-; / /)
 )
