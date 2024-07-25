@@ -203,7 +203,8 @@
 )
 
 (defvirtualkeys vkey-math (layer-while-held math))
-(defalias math (on-press press-vkey vkey-math))
+(defalias math (macro sldr m a t h))
+;;(defalias math (on-press press-vkey vkey-math))
 (deflayer math
   _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
   _   _    _    _    _    _    _    _    _    _    _    _    _    _
@@ -213,17 +214,19 @@
   _      _    _              _              _    _    _   _   _   _
 )
 
+
 (defseq
+    geq (m a t h S-. =)
+    leq (m a t h S-, =)
     dotcom (. S-3)
     dotorg (. S-4)
-
-    ;;     The shifted letters in parentheses means a single press of lsft
-    ;;     must remain held while both h and then s are pressed.
-    ;;     This is not the same as S-h S-s, which means that the lsft key
-    ;;     must be released and repressed between the h and s presses.
     https (S-(h s))
 )
 (defvirtualkeys
+    geq 🔣≥
+    leq 🔣≤
+    leftarrow 🔣←
+    rightarrow 🔣→
     dotcom (macro . c o m)
     dotorg (macro . o r g)
     https (macro h t t p s S-; / /)
