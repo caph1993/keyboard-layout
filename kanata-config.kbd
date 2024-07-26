@@ -3,23 +3,38 @@
   danger-enable-cmd yes
   movemouse-inherit-accel-state yes
   movemouse-smooth-diagonals yes
+  ;; sequence-input-mode visible-backspaced ;; shows the sequence as it is typed
+  sequence-input-mode hidden-delay-type ;; hides while typing. Outputs if invalid
+  sequence-timeout 8000 ;; 8 seconds maximum between key presses in sldr sequence
 )
 (defsrc
   esc  f1  f2   f3  f4   f5  f6   f7  f8   f9 f10  f11  f12 ins del
-  grv   1    2    3    4    5    6    7    8    9    0    -    =    bspc
-  tab    q    w    e    r    t    y    u    i    o    p    [    ]    \
-  caps    a    s    d    f    g    h    j    k    l    ;    '   ret
-  lsft     z    x    c    v    b    n    m    ,    .    /    rsft
-  lctl   lmet lalt          spc         ralt rctl   left up down right
+  grv   1    2    3    4    5    6    7    8    9    0    -    = bspc
+  tab    q    w    e    r    t    y    u    i    o    p    [    ] \ 
+  caps    a    s    d    f    g    h    j    k    l    ;    '    ret
+  lsft     z    x    c    v    b    n    m    ,    .    /        rsft
+  lctl   lmet lalt          spc             ralt rctl left up down right
 )
 
 (deflayer main
-  _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
-  @`  @1  @2    _   _    _    _    _    _    _    _    @-   @=   _
+  _  _    _    _   _    _   _    _   _    _   _    _    _    _   @del
+@fn` @1   @2   @3   _    _    _    _    _    _    _    _    @=  @bspc
   _    _    _    _    _    _    _    _    _    _    _    _    _   _
   _     _    _    _    _    _    _    _    _    _    _    _       _ 
-  @lsft  _    _    _    _    _    _    _    _    _    _       @rsft 
-  _      _   @lalt           _              _    _    _   _   _   _
+  _      _    _    _    _    _    _    _    _    _    _           _
+  _      _    _              _              _    _   @←  @↑  @↓  @→
+)
+;; nop0 is "fn" button
+(defalias ← (fork left  home (nop0)))
+(defalias ↑ (fork up    ⇞    (nop0)))
+(defalias ↓ (fork down  ⇟    (nop0)))
+(defalias → (fork right end  (nop0)))
+(defalias bspc (fork bspc del  (nop0)))
+(defalias del  (fork del  bspc (nop0)))
+
+(defoverrides
+  (lsft bspc) (del)
+  (lsft del) (bspc)
 )
 
 (deflayer empty-for-reference
@@ -30,30 +45,30 @@
   _      _    _    _    _    _    _    _    _    _    _           _ 
   _      _    _              _              _    _    _   _   _   _
 )
-(defalias lsft (multi lsft (layer-while-held numbers)))
-(defalias rsft (multi rsft (layer-while-held numbers)))
-(deflayer numbers
-  _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
-  grv 1    2    3    4    5    6    7    8    9    0    -    = bspc
-  _    _    _    _    _    _    _    _    _    _    _    _    _   _
-  _     _    _    _    _    _    _    _    _    _    _    _       _ 
-  _      _    _    _    _    _    _    _    _    _    _           _ 
-  _      _    _              _              _    _    _   _   _   _
+(deflayer disabled-for-reference
+  XX XX   XX   XX  XX   XX  XX   XX  XX   XX  XX   XX   XX   XX  XX
+  XX  XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX
+  XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX  XX
+  XX    XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX      XX 
+  XX     XX   XX   XX   XX   XX   XX   XX   XX   XX   XX          XX 
+  XX     XX   XX             XX             XX   XX   XX  XX  XX  XX
 )
-(defalias - (tap-hold-release 200 200 - (layer-while-held numbers-only)))
-(deflayer numbers-only
-  _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
-  grv 1    2    3    4    5    6    7    8    9    0    -    = bspc
-  _    XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX  _
-  _     XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX      _ 
-  _      XX   XX   XX   XX   XX   XX   XX   XX   XX   XX          _ 
-  _      _    _              _              _    _    _   _   _   _
-)
+;; (defalias - (tap-hold-release 200 200 - (layer-while-held numbers-only)))
+;; (deflayer numbers-only
+;;   _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
+;;   grv 1    2    3    4    5    6    7    8    9    0    -    = bspc
+;;   _    XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX  _
+;;   _     XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX      _ 
+;;   _      XX   XX   XX   XX   XX   XX   XX   XX   XX   XX          _ 
+;;   _      _    _              _              _    _    _   _   _   _
+;; )
 
 ;; ---------------------------------------------
 ;; grv on press, lctl on hold
+
 (defalias 1 (tap-hold-release 200 200 1 (multi lctl (layer-while-held hold-1))))
 (defalias 2 (tap-hold-release 200 200 2 (multi lsft (layer-while-held hold-1))))
+(defalias 3 (tap-hold-release 200 200 3 (multi lalt (layer-while-held hold-1))))
 (deflayer hold-1
   _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
   _   _    _   _  tab  esc   _    _    _   ret   _    _    _    _
@@ -62,90 +77,66 @@
   _      _    _    _    _    _    _    _    _    _    _           _ 
   _      _    _              lsft           _    _    _   _   _   _
 )
-(defalias lalt (multi lalt (layer-while-held hold-lalt)))
-(deflayer hold-lalt
+
+(defalias fn` (tap-hold-release 200 200 ` (multi nop0 (layer-while-held gate-3) (on-release release-vkey vkey-greek) (on-release release-vkey vkey-math) )))
+(defalias fn nop0)
+(deflayer gate-3
   _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
-  _   _    _    _   tab  esc   _    _    _   ret   _    _    _    _
+  _   _    _   @`3   _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _   _
   _     _    _    _    _    _    _    _    _    _    _    _       _ 
   _      _    _    _    _    _    _    _    _    _    _           _ 
-  _      _    _              lsft           _    _    @noA-home _  _ @noA-end
+  _      _    _                _            _    _    _   _   _   _
 )
 
-(defalias ` (tap-hold-release 200 200 ` (multi (layer-while-held hold-`) (on-release release-vkey vkey-`3) (on-release release-vkey vkey-greek) (on-release release-vkey vkey-math) )))
-(deflayer hold-`
-  _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
-  _   _    _    @`3  tab  esc   _    _    _   ret   _    _    _    _
-  _    _    _    _    _    _    _    _    _    _    _    _    _   _
-  _     _    _    _    _    _    _    _    _    _    _    _       _ 
-  _      _    _    _    _    _    _    _    _    _    _           _ 
-  _      _    _              lsft           _    _    @noA-home _  _ @noA-end
-)
-(defalias noA-home (unmod home))
-(defalias noA-end (unmod end))
-
-(defalias `3 (multi (layer-while-held hold-`) (on-press press-vkey vkey-`3) (tap-hold-release 200 200 XX (multi lalt))))
-(defvirtualkeys vkey-`3 (layer-while-held 3actions))
-(deflayer 3actions
+;; sldr when tapped, layer-while-held when held
+;; (defalias `3 (tap-hold-release 200 200 sldr (multi (on-press press-vkey vkey-`3) (on-release release-vkey vkey-`3))))
+;; (defvirtualkeys vkey-`3 (layer-while-held hold-`3))
+(defalias `3 (tap-hold-release 200 200 sldr (multi (layer-while-held disabled-for-reference) (layer-while-held hold-`3))))
+(deflayer hold-`3
   _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
   _   _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _    _  @term  _    _    _    _    _    _    _    _   _
+  _   lrld  _    _    _   @term _    _    _    _    _    _    _   _
   _     _    _    _    _  @greek _    _    _    _    _    _       _ 
-  _      _    _    _    _    _    _   @math  _    _    _           _ 
-  _      _    _            @albert           _    _    _   _   _   _
+  _      _    _    _    _    _    _   @math _    _    _           _ 
+  _      _    _            @albert          _    _    _   _   _   _
 )
 
 (defalias term M-F3)
 (defalias albert M-spc)
 
-(defoverrides
-  (lsft bspc) (del)
-  (lsft del) (bspc)
-)
 
 
 ;; ---------------------------------------------
 
-(defalias = (tap-hold-release 200 200 = (layer-while-held arrows)))
+(defalias = (tap-hold-release 200 200 = (multi (layer-while-held arrows) (on-release release-vkey vkey-mouse))) )
 (deflayer arrows
   _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
-  _   _   lsft  _    _   esc  _      ⇞  XX  ret   XX   _    _    _
-  _   C-q  C-w  C-e  C-r  C-t  C-y  bspc  ▲    ▶    XX  _    _   _
-  _    C-a  C-s  C-d  C-f   _    ⇤    ◀    ▼   XX   ⇥   _       _ 
-  _     C-z  C-x  C-c  C-v   _    del  XX   ⇟   XX    _           _ 
-  _      _    @mse           lsft           _    _    _   _   _   _
+  _   _   lsft  _    _   esc  _      XX  XX  ret   XX   @=-  _    _
+  _   C-q  C-w  C-e  C-r  C-t  C-y  @bspc @↑  @→    XX   _    _   _
+  _    C-a  C-s  C-d  C-f   _    XX   @←   @↓   XX   XX   _       _ 
+  _     C-z  C-x  C-c  C-v   XX   @del XX   XX   XX   _           _ 
+  _      _    _            lsft             @fn  _    _   _   _   _
 )
 
-(defalias mse (layer-while-held mouse))
+(defalias =- (on-press toggle-vkey vkey-mouse))
+(defvirtualkeys vkey-mouse (layer-while-held mouse))
 (deflayer mouse
   _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
-  _   _    _    _    _    _   🖰3    _  @🖱☸↑  _    _    _    _    _
-  _    _    _    _    _    _    _    _   @🖱↑  @🖱→   _    _    _   _
-  _     _    _    _    _    _    _   @🖱←  @🖱↓   _    _    _       _ 
-  _      _    _    _    _    _   ‹🖰   🖰›  @🖱☸↓ _    _           _ 
-  _      _    _    (layer-while-held slow-mouse) _    _    _   _   _   _
-)
-(deflayer slow-mouse
-  _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
-  _   _    _    _    _    _   _     _   _     _    _    _    _    _
-  _    _    _    _    _    _    _    _   @🖱s↑  @🖱s→   _    _    _   _
-  _     _    _    _    _    _    _   @🖱s←  @🖱s↓   _    _    _       _ 
-  _      _    _    _    _    _   _    _     _    _    _           _ 
-  _      _    _    (layer-while-held slow-mouse)      _    _    _   _   _   _
+  _   _    _    _    _    _   🖰3    XX   XX   XX   _    _    _    _
+  _    _    _    _    _    _    XX  XX   @🖱↑  @🖱→   _    _    _   _
+  _     _    _    _    _    _    XX  @🖱←  @🖱↓  XX    _    _       _ 
+  _      _    _    _    _    XX  ‹🖰   🖰›   XX   _    _           _ 
+  _      _    _           _                 _    _    _   _   _   _
 )
 
 (defalias
-  🖱↑  (🖱↑ 3 3)
-  🖱→  (🖱→ 3 3)
-  🖱←  (🖱← 3 3)
-  🖱↓  (🖱↓ 3 3)
-  🖱s↑ (🖱↑ 3 1)
-  🖱s→ (🖱→ 3 1)
-  🖱s← (🖱← 3 1)
-  🖱s↓ (🖱↓ 3 1)
-  🖱☸↑ (🖱☸↑ 25 60)
-  🖱☸↓ (🖱☸↓ 25 60)
+  🖱↑  (fork (fork (🖱accel↑ 5 300 1 10) (🖱☸↑ 25 120) (nop0)) (fork (🖱accel↑ 10 300 1 5) (🖱☸↑ 25 10) (nop0)) (lsft))
+  🖱→  (fork (fork (🖱accel→ 5 300 1 10) (🖱☸→ 25 120) (nop0)) (fork (🖱accel→ 10 300 1 5) (🖱☸→ 25 10) (nop0)) (lsft))
+  🖱←  (fork (fork (🖱accel← 5 300 1 10) (🖱☸← 25 120) (nop0)) (fork (🖱accel← 10 300 1 5) (🖱☸← 25 10) (nop0)) (lsft))
+  🖱↓  (fork (fork (🖱accel↓ 5 300 1 10) (🖱☸↓ 25 120) (nop0)) (fork (🖱accel↓ 10 300 1 5) (🖱☸↓ 25 10) (nop0)) (lsft))
 )
+;; Either there is a bug of a hardware issue: the @fn` key works as fn for right and left but not for up and down. But the @fn key works for all of them.
 
 
 ;; ---------------------------------------------
@@ -231,3 +222,232 @@
     dotorg (macro . o r g)
     https (macro h t t p s S-; / /)
 )
+
+(deftemplate seq-vkey (vk-name input-keys output-action)
+  (defvirtualkeys $vk-name $output-action)
+  (defseq $vk-name $input-keys)
+)
+
+(template-expand seq-vkey \perp         (\ p e r p                   spc) (unicode ⟂))
+(template-expand seq-vkey \xi           (\ x i                       spc) (unicode ξ))
+(template-expand seq-vkey \omega        (\ o m e g a                 spc) (unicode ω))
+(template-expand seq-vkey \theta        (\ t h e t a                 spc) (unicode θ))
+(template-expand seq-vkey \phi          (\ p h i                     spc) (unicode ϕ))
+(template-expand seq-vkey \sigma        (\ s i g m a                 spc) (unicode σ))
+(template-expand seq-vkey \pi           (\ p i                       spc) (unicode π))
+(template-expand seq-vkey \lambda       (\ l a m b d a               spc) (unicode λ))
+(template-expand seq-vkey \delta        (\ d e l t a                 spc) (unicode δ))
+(template-expand seq-vkey \gamma        (\ g a m m a                 spc) (unicode γ))
+(template-expand seq-vkey \zeta         (\ z e t a                   spc) (unicode ζ))
+(template-expand seq-vkey \chi          (\ c h i                     spc) (unicode χ))
+(template-expand seq-vkey \tau          (\ t a u                     spc) (unicode τ))
+(template-expand seq-vkey \rho          (\ r h o                     spc) (unicode ρ))
+(template-expand seq-vkey \varphi       (\ v a r p h i               spc) (unicode φ))
+(template-expand seq-vkey \nu           (\ n u                       spc) (unicode ν))
+(template-expand seq-vkey \mu           (\ m u                       spc) (unicode μ))
+(template-expand seq-vkey \eta          (\ e t a                     spc) (unicode η))
+(template-expand seq-vkey \kappa        (\ k a p p a                 spc) (unicode κ))
+(template-expand seq-vkey \iota         (\ i o t a                   spc) (unicode ι))
+(template-expand seq-vkey \eps          (\ e p s spc                 spc) (unicode ϵ))
+(template-expand seq-vkey \epsilon      (\ e p s i l o n             spc) (unicode ϵ))
+(template-expand seq-vkey \beta         (\ b e t a                   spc) (unicode β))
+(template-expand seq-vkey \alpha        (\ a l p h a                 spc) (unicode α))
+(template-expand seq-vkey \greek        (\ g r e e k                 spc) (macro 🔣α 🔣β 🔣γ 🔣δ 🔣ε 🔣ϕ 🔣φ 🔣ι 🔣κ 🔣λ 🔣η 🔣μ 🔣ν 🔣ω 🔣π 🔣ρ 🔣σ 🔣τ 🔣χ 🔣ο 🔣ς 🔣υ 🔣ψ 🔣ϐ 🔣ϑ 🔣ϛ 🔣ϝ 🔣ϝ 🔣ϟ 🔣ϟ 🔣ϡ 🔣ϡ 🔣ϰ 🔣ϱ 🔣ϵ 🔣϶ 🔣α 🔣β 🔣ε 🔣ζ 🔣η 🔣ι 🔣κ 🔣μ 🔣ν 🔣ο 🔣τ 🔣υ 🔣χ 🔣ψ 🔣ζ 🔣θ 🔣ξ 🔣γ 🔣δ 🔣λ 🔣π 🔣σ 🔣φ 🔣θ 🔣ω 🔣ξ))
+(template-expand seq-vkey \down         (\ d o w n                   spc) (unicode ↓))
+(template-expand seq-vkey \up           (\ u p                       spc) (unicode ↑ ))
+(template-expand seq-vkey \mapsto       (\ m a p s t o               spc) (unicode ↦))
+(template-expand seq-vkey \rightarrow   (\ r i g h t a r r o w       spc) (unicode →))
+(template-expand seq-vkey \leftarrow    (\ l e f t a r r o w         spc) (unicode ←))
+(template-expand seq-vkey \left         (\ l e f t                   spc) (unicode ←))
+(template-expand seq-vkey \right        (\ r i g h t                 spc) (unicode →))
+(template-expand seq-vkey \to           (\ t o                       spc) (unicode →))
+(template-expand seq-vkey \proportional (\ p r o p o r t i o n a l   spc) (unicode ∝))
+(template-expand seq-vkey \propto       (\ p r o p t o               spc) (unicode ∝))
+(template-expand seq-vkey \prop         (\ p r o p                   spc) (unicode ∝))
+(template-expand seq-vkey \approx       (\ a p p r o x               spc) (unicode ≈))
+(template-expand seq-vkey \neq          (\ n e q                     spc) (unicode ≠))
+(template-expand seq-vkey \eqdef        (\ e q d e f                 spc) (unicode ≝))
+(template-expand seq-vkey \leq          (\ l e q                     spc) (unicode ≤))
+(template-expand seq-vkey \geq          (\ g e q                     spc) (unicode ≥))
+(template-expand seq-vkey \sum          (\ s u m                     spc) (unicode ∑))
+(template-expand seq-vkey \in           (\ i n                       spc) (unicode ∈))
+(template-expand seq-vkey \infty        (\ i n f t y                 spc) (unicode ∞))
+(template-expand seq-vkey \cdots        (\ c d o t s                 spc) (unicode ⋯))
+(template-expand seq-vkey \updelta      (\ u p d e l t a             spc) (unicode δ))
+(template-expand seq-vkey \dag          (\ d a g                     spc) (unicode †))
+(template-expand seq-vkey \rangle       (\ r a n g l e               spc) (unicode 〉))
+(template-expand seq-vkey \langle       (\ l a n g l e               spc) (unicode 〈))
+(template-expand seq-vkey \cala         (\ c a l a                   spc) (unicode 𝓐))
+(template-expand seq-vkey \bba          (\ b b a                     spc) (unicode 𝔸))
+(template-expand seq-vkey \arrows       (\ a r r o w s               spc) (macro  🔣← 🔣↑ 🔣→ 🔣↓ 🔣↔ 🔣↕ 🔣↖ 🔣↘ 🔣↙ 🔣↚ 🔣↛ 🔣↜ 🔣↝ 🔣↞ 🔣↟ 🔣↠ 🔣↡ 🔣↢ 🔣↣ 🔣↤ 🔣↥ 🔣↦ 🔣↧ 🔣↨ 🔣↩ 🔣↯ 🔣↰ 🔣↱ 🔣↲ 🔣↳ 🔣↴ 🔣↵ 🔣↶ 🔣↷ 🔣↸ 🔣↹ 🔣↺ 🔣↻ 🔣↼ 🔣↽ 🔣↾ 🔣↿ 🔣⇀ 🔣⇁ 🔣⇂ 🔣⇃ 🔣⇄ 🔣⇅ 🔣⇆ 🔣⇇ 🔣⇈ 🔣⇉ 🔣⇊ 🔣⇋ 🔣⇌ 🔣⇍ 🔣⇎ 🔣⇏ 🔣⇐ 🔣⇑ 🔣⇒ 🔣⇓ 🔣⇔ 🔣⇕ 🔣⇖ 🔣⇗ 🔣⇘ 🔣⇙ 🔣⇚ 🔣⇛ 🔣⇜ 🔣⇝ 🔣⇞ 🔣⇟ 🔣⇠ 🔣⇡ 🔣⇢ 🔣⇣ 🔣⇤ 🔣⇥ 🔣⇦ 🔣⇧ 🔣⇨ 🔣⇩ 🔣⇪ 🔣⇫ 🔣⇬ 🔣⇭ 🔣⇮ 🔣⇯ 🔣⇰ 🔣⇱ 🔣⇲ 🔣⇳ 🔣⇴ 🔣⇵ 🔣⇶ 🔣⇷ 🔣⇸ 🔣⇹ 🔣⇺ 🔣⇻ 🔣⇼ 🔣⇽ 🔣⇾ 🔣⇿ 🔣☇ 🔣☈ 🔣➘ 🔣➙ 🔣➚ 🔣➛ 🔣➜ 🔣➝ 🔣➞ 🔣➟ 🔣➠ 🔣➡ 🔣➢ 🔣➣ 🔣➤ 🔣➥ 🔣➦ 🔣➧ 🔣➨ 🔣➩ 🔣➪ 🔣➫ 🔣➬ 🔣➭ 🔣➮ 🔣➯ 🔣➱ 🔣➲ 🔣➳ 🔣➴ 🔣➵ 🔣➶ 🔣➷ 🔣➸ 🔣➹ 🔣➺ 🔣➻ 🔣➼ 🔣➽ 🔣➾ 🔣⟰ 🔣⟱ 🔣⟲ 🔣⟳ 🔣⟴ 🔣⟵ 🔣⟶ 🔣⟷ 🔣⟸ 🔣⟹ 🔣⟺ 🔣⟻ 🔣⟼ 🔣⟽ 🔣⟾ 🔣⟿ 🔣⤀ 🔣⤁ 🔣⤂ 🔣⤃ 🔣⤄ 🔣⤅ 🔣⤆ 🔣⤇ 🔣⤈ 🔣⤉ 🔣⤊ 🔣⤋ 🔣⤌ 🔣⤍ 🔣⤎ 🔣⤏ 🔣⤐ 🔣⤑ 🔣⤒ 🔣⤓ 🔣⤔ 🔣⤕ 🔣⤖ 🔣⤗ 🔣⤘ 🔣⤙ 🔣⤚ 🔣⤛ 🔣⤜ 🔣⤝ 🔣⤞ 🔣⤟ 🔣⤠ 🔣⤡ 🔣⤢ 🔣⤣ 🔣⤤ 🔣⤥ 🔣⤦ 🔣⤧ 🔣⤨ 🔣⤩ 🔣⤪ 🔣⤫ 🔣⤬ 🔣⤭ 🔣⤮ 🔣⤯ 🔣⤰ 🔣⤱ 🔣⤲ 🔣⤳ 🔣⤴ 🔣⤵ 🔣⤶ 🔣⤷ 🔣⤸ 🔣⤹ 🔣⤺ 🔣⤻ 🔣⤼ 🔣⤽ 🔣⤾ 🔣⤿ 🔣⥀ 🔣⥁ 🔣⥂ 🔣⥃ 🔣⥄ 🔣⥅ 🔣⥆ 🔣⥇ 🔣⥈ 🔣⥉ 🔣⥊ 🔣⥋ 🔣⥌ 🔣⥍ 🔣⥎ 🔣⥏ 🔣⥐ 🔣⥑ 🔣⥒ 🔣⥓ 🔣⥔ 🔣⥕ 🔣⥖ 🔣⥗ 🔣⥘ 🔣⥙ 🔣⥚ 🔣⥛ 🔣⥜ 🔣⥝ 🔣⥞ 🔣⥟ 🔣⥠ 🔣⥡ 🔣⥢ 🔣⥣ 🔣⥤ 🔣⥥ 🔣⥦ 🔣⥧ 🔣⥨ 🔣⥩ 🔣⥪ 🔣⥫ 🔣⥬ 🔣⥭ 🔣⥮ 🔣⥯ 🔣⥰ 🔣⥱ 🔣⥲ 🔣⥳ 🔣⥴ 🔣⥵ 🔣⥶ 🔣⥷ 🔣⥸ 🔣⥹ 🔣⥺ 🔣⥻ 🔣⥼ 🔣⥽ 🔣⥾ 🔣⥿ 🔣⬀ 🔣⬁ 🔣⬂ 🔣⬃ 🔣⬄ 🔣⬅ 🔣⬆ 🔣⬇ 🔣⬈ 🔣⬉ 🔣⬊ 🔣⬋ 🔣⬌ 🔣⬍ 🔣⬎ 🔣⬏ 🔣⬐ 🔣⬑ 🔣⬰ 🔣⬱ 🔣⬲ 🔣⬳ 🔣⬴ 🔣⬵ 🔣⬶ 🔣⬷ 🔣⬸ 🔣⬹ 🔣⬺ 🔣⬻ 🔣⬼ 🔣⬽ 🔣⬾ 🔣⬿ 🔣⭀ 🔣⭁ 🔣⭂ 🔣⭃ 🔣⭄ 🔣⭅ 🔣⭆ 🔣⭇ 🔣⭈ 🔣⭉ 🔣⭊ 🔣⭋ 🔣⭌ 🔣⭍ 🔣⭎ 🔣⭏ 🔣⭚ 🔣⭛ 🔣⭜ 🔣⭝ 🔣⭞ 🔣⭟ 🔣⭠ 🔣⭡ 🔣⭢ 🔣⭣ 🔣⭤ 🔣⭥ 🔣⭦ 🔣⭧ 🔣⭨ 🔣⭩ 🔣⭪ 🔣⭬ 🔣⭭ 🔣⭮ 🔣⭯ 🔣⭱ 🔣⭲ 🔣⭳ 🔣⭶ 🔣⭷ 🔣⭸ 🔣⭺ 🔣⭻ 🔣⭼ 🔣⭽ 🔣⭾ 🔣⭿ 🔣⮀ 🔣⮁ 🔣⮂ 🔣⮃ 🔣⮄ 🔣⮅ 🔣⮆ 🔣⮇ 🔣⮈ 🔣⮉ 🔣⮊ 🔣⮋ 🔣⮌ 🔣⮍ 🔣⮎ 🔣⮏ 🔣⮐ 🔣⮑ 🔣⮒ 🔣⮓ 🔣⮔ 🔣⮕ 🔣⮗ 🔣⮘ 🔣⮙ 🔣⮚ 🔣⮛ 🔣⮜ 🔣⮝ 🔣⮞ 🔣⮟ 🔣⮠ 🔣⮡ 🔣⮢ 🔣⮣ 🔣⮥ 🔣⮦ 🔣⮧ 🔣⮩ 🔣⮪ 🔣⮫ 🔣⮭ 🔣⮮ 🔣⮯ 🔣⮱ 🔣⮲ 🔣⮴ 🔣⮵ 🔣⮶ 🔣⮷ 🔣⮸ 🔣⮹ 🔣⯬ 🔣⯭ 🔣⯮ 🔣⯯ 🔣🏹 🔣🔙 🔣🔚 🔣🔛 🔣🔜 🔣🔝 🔣🞀 🔣🞁 🔣🞂 🔣🞃 🔣🠀 🔣🠁 🔣🠂 🔣🠃 🔣🠄 🔣🠅 🔣🠆 🔣🠇 🔣🠈 🔣🠉 🔣🠊 🔣🠋 🔣🠐 🔣🠑 🔣🠒 🔣🠓 🔣🠔 🔣🠕 🔣🠖 🔣🠗 🔣🠘 🔣🠙 🔣🠚 🔣🠛 🔣🠜 🔣🠝 🔣🠞 🔣🠟 🔣🠠 🔣🠡 🔣🠢 🔣🠣 🔣🠤 🔣🠥 🔣🠦 🔣🠧 🔣🠨 🔣🠩 🔣🠪 🔣🠫 🔣🠬 🔣🠭 🔣🠮 🔣🠯 🔣🠰 🔣🠱 🔣🠲 🔣🠳 🔣🠵 🔣🠶 🔣🠷 🔣🠸 🔣🠹 🔣🠺 🔣🠼 🔣🠽 🔣🠾 🔣🠿 🔣🡀 🔣🡁 🔣🡂 🔣🡃 🔣🡄 🔣🡅 🔣🡆 🔣🡇 🔣🡐 🔣🡑 🔣🡒 🔣🡓 🔣🡔 🔣🡕 🔣🡖 🔣🡗 🔣🡘 🔣🡙 🔣🡠 🔣🡡 🔣🡢 🔣🡣 🔣🡤 🔣🡥 🔣🡦 🔣🡧 🔣🡨 🔣🡩 🔣🡪 🔣🡫 🔣🡬 🔣🡭 🔣🡮 🔣🡯 🔣🡰 🔣🡱 🔣🡲 🔣🡳 🔣🡴 🔣🡵 🔣🡶 🔣🡷 🔣🡸 🔣🡹 🔣🡺 🔣🡻 🔣🡼 🔣🡽 🔣🡾 🔣🡿 🔣🢀 🔣🢁 🔣🢂 🔣🢃 🔣🢄 🔣🢅 🔣🢆 🔣🢇 🔣🢐 🔣🢑 🔣🢒 🔣🢓 🔣🢔 🔣🢕 🔣🢖 🔣🢗 🔣🢘 🔣🢙 🔣🢚 🔣🢛 🔣🢜 🔣🢝 🔣🢞 🔣🢟 🔣🢠 🔣🢡 🔣🢢 🔣🢣 🔣🢤 🔣🢥 🔣🢦 🔣🢧 🔣🢨 🔣🢩 🔣🢪 🔣🢫 🔣🢬 🔣🢭 🔣🢰 🔣🢱))
+(template-expand seq-vkey \calb         (\ c a l b                   spc) (unicode 𝓑))
+(template-expand seq-vkey \calc         (\ c a l c                   spc) (unicode 𝓒))
+(template-expand seq-vkey \cald         (\ c a l d                   spc) (unicode 𝓓))
+(template-expand seq-vkey \cale         (\ c a l e                   spc) (unicode 𝓔))
+(template-expand seq-vkey \bbe          (\ b b e                     spc) (unicode 𝔼))
+(template-expand seq-vkey \calf         (\ c a l f                   spc) (unicode 𝓕))
+(template-expand seq-vkey \calg         (\ c a l g                   spc) (unicode 𝓖))
+(template-expand seq-vkey \calh         (\ c a l h                   spc) (unicode 𝓗))
+(template-expand seq-vkey \call         (\ c a l l                   spc) (unicode 𝓛))
+(template-expand seq-vkey \calm         (\ c a l m                   spc) (unicode 𝓜))
+(template-expand seq-vkey \caln         (\ c a l n                   spc) (unicode 𝓝))
+(template-expand seq-vkey \bbn          (\ b b n                     spc) (unicode ℕ))
+(template-expand seq-vkey \calp         (\ c a l p                   spc) (unicode 𝓟))
+(template-expand seq-vkey \bbp          (\ b b p                     spc) (unicode ℙ))
+(template-expand seq-vkey \calq         (\ c a l q                   spc) (unicode 𝓠))
+(template-expand seq-vkey \bbq          (\ b b q                     spc) (unicode ℚ))
+(template-expand seq-vkey \calr         (\ c a l r                   spc) (unicode 𝓡))
+(template-expand seq-vkey \bbr          (\ b b r                     spc) (unicode ℝ))
+(template-expand seq-vkey \calu         (\ c a l u                   spc) (unicode 𝓤))
+(template-expand seq-vkey \calw         (\ c a l w                   spc) (unicode 𝓦))
+(template-expand seq-vkey \calx         (\ c a l x                   spc) (unicode 𝓧))
+(template-expand seq-vkey \caly         (\ c a l y                   spc) (unicode 𝓨))
+(template-expand seq-vkey \calz         (\ c a l z                   spc) (unicode 𝓩))
+(template-expand seq-vkey \parallel     (\ p a r a l l e l           spc) (unicode ∥))
+(template-expand seq-vkey \norm         (\ n o r m                   spc) (macro 🔣‖ 🔣· 🔣‖))
+(template-expand seq-vkey \noteq        (\ n o t e q                 spc) (unicode ≠))
+(template-expand seq-vkey \cdot         (\ c d o t                   spc) (unicode ·))
+(template-expand seq-vkey \bbone        (\ b b o n e                 spc) (unicode 𝟙))
+(template-expand seq-vkey \rr           (\ r r                       spc) (unicode ≫))
+(template-expand seq-vkey \ll           (\ l l                       spc) (unicode ≪))
+(template-expand seq-vkey \equiv        (\ e q u i v                 spc) (unicode ≡))
+(template-expand seq-vkey \isomorphic   (\ i s o m o r p h i c       spc) (unicode ≌))
+(template-expand seq-vkey \entails      (\ e n t a i l s             spc) (macro 🔣⊢ 🔣⊦ 🔣⊧ 🔣⊨))
+(template-expand seq-vkey \minusplus    (\ m i n u s p l u s         spc) (unicode ∓))
+(template-expand seq-vkey \circ         (\ c i r c                   spc) (unicode ∘))
+(template-expand seq-vkey \play         (\ p l a y                   spc) (unicode ⊳))
+(template-expand seq-vkey \then         (\ t h e n                   spc) (unicode ⊳))
+(template-expand seq-vkey \bot          (\ b o t                     spc) (unicode ⊥))
+(template-expand seq-vkey \top          (\ t o p                     spc) (unicode ⊤))
+(template-expand seq-vkey \oplus        (\ o p l u s                 spc) (unicode ⊕))
+(template-expand seq-vkey \times        (\ t i m e s                 spc) (unicode ×))
+(template-expand seq-vkey \transpose    (\ t r a n s p o s e         spc) (unicode ᵀ))
+(template-expand seq-vkey \bullet       (\ b u l l e t               spc) (unicode •))
+(template-expand seq-vkey \normal       (\ n o r m a l               spc) (macro 🔣~ 🔣𝓝 \( 🔣μ 🔣, spc 🔣σ 🔣² \) ))
+(template-expand seq-vkey \prod         (\ p r o d                   spc) (unicode π))
+(template-expand seq-vkey \sqrt3        (\ s q r t 3                 spc) (unicode ∛))
+(template-expand seq-vkey \sqrt         (\ s q r t                   spc) (unicode √))
+(template-expand seq-vkey \uomega       (\ u o m e g a               spc) (unicode ω))
+(template-expand seq-vkey \ulambda      (\ u l a m b d a             spc) (unicode λ))
+(template-expand seq-vkey \upi          (\ u p i                     spc) (unicode ∏))
+(template-expand seq-vkey \usigma       (\ u s i g m a               spc) (unicode ∑))
+(template-expand seq-vkey \udelta       (\ u d e l t a               spc) (unicode δ))
+(template-expand seq-vkey \ugamma       (\ u g a m m a               spc) (unicode γ))
+(template-expand seq-vkey \over         (\ o v e r                   spc) (unicode ⁄))
+(template-expand seq-vkey \frac         (\ f r a c                   spc) (unicode ⁄))
+(template-expand seq-vkey \varepsilon   (\ v a r e p s i l o n       spc) (unicode ε))
+(template-expand seq-vkey \nxn          (\ n x n                     spc) (macro 🔣n 🔣× 🔣n))
+(template-expand seq-vkey \mxn          (\ m x n                     spc) (macro 🔣m 🔣× 🔣n))
+(template-expand seq-vkey \notparallel  (\ n o t p a r a l l e l     spc) (unicode ∦))
+(template-expand seq-vkey \nparallel    (\ n p a r a l l e l         spc) (unicode ∦))
+(template-expand seq-vkey \notsubseteq  (\ n o t s u b s e t e q     spc) (unicode ⊈))
+(template-expand seq-vkey \supseteq     (\ s u p s e t e q           spc) (unicode ⊇))
+(template-expand seq-vkey \subseteq     (\ s u b s e t e q           spc) (unicode ⊆))
+(template-expand seq-vkey \notsupset    (\ n o t s u p s e t         spc) (unicode ⊅))
+(template-expand seq-vkey \notsubset    (\ n o t s u b s e t         spc) (unicode ⊄))
+(template-expand seq-vkey \supset       (\ s u p s e t               spc) (unicode ⊃))
+(template-expand seq-vkey \subset       (\ s u b s e t               spc) (unicode ⊂))
+(template-expand seq-vkey \notsupseteq  (\ n o t s u p s e t e q     spc) (unicode ⊉))
+(template-expand seq-vkey \coloneq      (\ c o l o n e q             spc) (unicode ≔))
+(template-expand seq-vkey \:=           (\ S-; =                     spc) (unicode ≔))
+(template-expand seq-vkey \ne           (\ n e                       spc) (unicode ≠))
+(template-expand seq-vkey \dash         (\ d a s h                   spc) (unicode —))
+(template-expand seq-vkey \emdash       (\ e m d a s h               spc) (unicode —))
+(template-expand seq-vkey \em           (\ e m                       spc) (unicode —))
+(template-expand seq-vkey \grad         (\ g r a d                   spc) (unicode ∇))
+(template-expand seq-vkey \nabla        (\ n a b l a                 spc) (unicode ∇))
+(template-expand seq-vkey ==>           (= = S-,                     spc) (unicode ⇒))
+(template-expand seq-vkey 2/3           (2 / 3                       spc) (unicode ⅔))
+(template-expand seq-vkey tm            (t m                         spc) (unicode ™))
+(template-expand seq-vkey 7/8           (7 / 8                       spc) (unicode ⅞))
+(template-expand seq-vkey 5/6           (5 / 6                       spc) (unicode ⅚))
+(template-expand seq-vkey 5/8           (5 / 8                       spc) (unicode ⅝))
+(template-expand seq-vkey 3/5           (3 / 5                       spc) (unicode ⅗))
+(template-expand seq-vkey 3/4           (3 / 4                       spc) (unicode ¾))
+(template-expand seq-vkey <==           (S-, = =                     spc) (unicode ⇐))
+(template-expand seq-vkey 2/5           (2 / 5                       spc) (unicode ⅖))
+(template-expand seq-vkey <=>           (S-, = S-.                   spc) (unicode ⇔))
+(template-expand seq-vkey 3/8           (3 / 8                       spc) (unicode ⅜))
+(template-expand seq-vkey 4/5           (4 / 5                       spc) (unicode ⅘))
+(template-expand seq-vkey -->           (- - S-.                     spc) (unicode →))
+(template-expand seq-vkey ...           (. . .                       spc) (unicode …))
+(template-expand seq-vkey <--           (S-, - -                     spc) (unicode ←))
+(template-expand seq-vkey 1/6           (1 / 6                       spc) (unicode ⅙))
+(template-expand seq-vkey 1/8           (1 / 8                       spc) (unicode ⅛))
+(template-expand seq-vkey 1/3           (1 / 3                       spc) (unicode ⅓))
+(template-expand seq-vkey 1/2           (1 / 2                       spc) (unicode ½))
+(template-expand seq-vkey c/o           (c / o                       spc) (unicode ℅))
+(template-expand seq-vkey 1/5           (1 / 5                       spc) (unicode ⅕))
+(template-expand seq-vkey 1/4           (1 / 4                       spc) (unicode ¼))
+(template-expand seq-vkey =:            (= S-;                       spc) (unicode ≕))
+(template-expand seq-vkey ^t            (S-6 t                       spc) (unicode ᵀ))
+(template-expand seq-vkey ^{-1}         (S-6 { - 1 }                 spc) (macro 🔣⁻🔣¹))
+(template-expand seq-vkey ^-1           (S-6 - 1                     spc) (macro 🔣⁻🔣¹))
+(template-expand seq-vkey ^+            (S-6 S-=                     spc) (unicode ⁺))
+(template-expand seq-vkey /dzh          (/ d z h                     spc) (macro 🔣d͡ 🔣ʒ))
+(template-expand seq-vkey /tsh          (/ t s h                     spc) (macro 🔣t͡ 🔣ʃ))
+(template-expand seq-vkey /darkl        (/ d a r k l                 spc) (unicode ɫ))
+(template-expand seq-vkey ^w            (S-6 w                       spc) (unicode ʷ))
+(template-expand seq-vkey ^j            (S-6 j                       spc) (unicode ʲ))
+(template-expand seq-vkey ^h            (S-6 h                       spc) (unicode ʰ))
+(template-expand seq-vkey /--           (/ - -                       spc) (unicode ʔ))
+(template-expand seq-vkey /jh           (/ j h                       spc) (unicode ʝ))
+(template-expand seq-vkey /nh           (/ n h                       spc) (unicode ɳ))
+(template-expand seq-vkey /ñ            (/ RA-n                      spc) (unicode ɲ))
+(template-expand seq-vkey /zh           (/ z h                       spc) (unicode ʒ))
+(template-expand seq-vkey /6            (/ 6                         spc) (unicode ɕ))
+(template-expand seq-vkey /r            (/ r                         spc) (unicode ɾ))
+(template-expand seq-vkey /rh           (/ r h                       spc) (unicode ɹ))
+(template-expand seq-vkey /rr           (/ r r                       spc) (unicode ʁ))
+(template-expand seq-vkey /gh           (/ g h                       spc) (unicode ɣ))
+(template-expand seq-vkey /ng           (/ n g                       spc) (unicode ŋ))
+(template-expand seq-vkey /bh           (/ b h                       spc) (unicode β))
+(template-expand seq-vkey /dh           (/ d h                       spc) (unicode ð))
+(template-expand seq-vkey /th           (/ t h                       spc) (unicode θ))
+(template-expand seq-vkey /sh           (/ s h                       spc) (unicode ʃ))
+(template-expand seq-vkey /kh           (/ k h                       spc) (unicode χ))
+(template-expand seq-vkey /lh           (/ l h                       spc) (unicode ʎ))
+(template-expand seq-vkey /oe           (/ o e                       spc) (unicode œ))
+(template-expand seq-vkey /ae           (/ a e                       spc) (unicode æ))
+;; (template-expand seq-vkey /ỳ            (/ ỳ                         spc) (unicode ʏ))
+;; (template-expand seq-vkey /ä            (/ ä                         spc) (unicode æ))
+;; (template-expand seq-vkey /à            (/ à                         spc) (unicode ʌ))
+;; (template-expand seq-vkey /ò            (/ ò                         spc) (unicode ɔ))
+;; (template-expand seq-vkey /è            (/ è                         spc) (unicode ɜ))
+;; (template-expand seq-vkey /ö            (/ ö                         spc) (unicode ø))
+;; (template-expand seq-vkey /ì            (/ ì                         spc) (unicode ɪ))
+;; (template-expand seq-vkey /ù            (/ ù                         spc) (unicode ʊ))
+;; (template-expand seq-vkey /ô            (/ ô                         spc) (unicode ɒ))
+;; (template-expand seq-vkey /e            (/ e                         spc) (unicode ə))
+;; (template-expand seq-vkey /â            (/ â                         spc) (unicode ɑ))
+(template-expand seq-vkey _i=1..        (S-- i = 1 . .               spc) (macro 🔣ᵢ 🔣₌ 🔣₁ 🔣₂ 🔣. 🔣. 🔣ₙ 🔣ₘ))
+(template-expand seq-vkey _=            (S-- =                       spc) (unicode ₌))
+(template-expand seq-vkey _x            (S-- x                       spc) (unicode ₓ))
+(template-expand seq-vkey ^k            (S-6 k                       spc) (unicode ᵏ))
+(template-expand seq-vkey _k            (S-- k                       spc) (unicode ₖ))
+(template-expand seq-vkey _j            (S-- j                       spc) (unicode ⱼ))
+(template-expand seq-vkey _1..m         (S-- 1 . . m                 spc) (macro 🔣₁ 🔣. 🔣. 🔣ₘ))
+(template-expand seq-vkey _m            (S-- m                       spc) (unicode ₘ))
+(template-expand seq-vkey _n            (S-- n                       spc) (unicode ₙ))
+(template-expand seq-vkey ^d            (S-6 d                       spc) (unicode ᵈ))
+(template-expand seq-vkey ^m            (S-6 m                       spc) (unicode ᵐ))
+(template-expand seq-vkey ^i            (S-6 i                       spc) (unicode ⁱ))
+(template-expand seq-vkey ^n            (S-6 n                       spc) (unicode ⁿ))
+(template-expand seq-vkey _0            (S-- 0                       spc) (unicode ₀))
+(template-expand seq-vkey _1            (S-- 1                       spc) (unicode ₁))
+(template-expand seq-vkey _i            (S-- i                       spc) (unicode ᵢ))
+(template-expand seq-vkey _1..n         (S-- 1 . . n                 spc) (macro 🔣₁ 🔣. 🔣. 🔣ₙ))
+(template-expand seq-vkey ^2            (S-6 2                       spc) (unicode ²))
+(template-expand seq-vkey 1/n           (1 / n                       spc) (macro 🔣¹ 🔣⁄ 🔣ₙ))
+(template-expand seq-vkey ,...,         (, . . . ,                   spc) (macro 🔣, 🔣… 🔣,))
+(template-expand seq-vkey ,...          (, . . .                     spc) (macro 🔣, 🔣…))
+(template-expand seq-vkey +...+         (S-= . . . S-=               spc) (macro 🔣+ 🔣⋯ 🔣+))
+(template-expand seq-vkey ...+          (. . . S-=                   spc) (macro 🔣⋯ 🔣+))
+(template-expand seq-vkey ...,          (. . . ,                     spc) (macro 🔣… 🔣,))
+(template-expand seq-vkey 1/            (1 /                         spc) (macro 🔣¹ 🔣⁄))
+(template-expand seq-vkey 2/            (2 /                         spc) (macro 🔣² 🔣⁄))
+(template-expand seq-vkey _123          (S-- 1 2 3                   spc) (macro 🔣₁ 🔣₂ 🔣₃ 🔣₄ 🔣₅ 🔣₆ 🔣₇ 🔣₈ 🔣₉ 🔣₀))
+(template-expand seq-vkey ^123          (S-6 1 2 3                   spc) (macro 🔣¹ 🔣² 🔣³ 🔣⁴ 🔣⁵ 🔣⁶ 🔣⁷ 🔣⁸ 🔣⁹ 🔣⁰))
+;; (defvirtualkeys
+;;   ;;\superscripts (unicode latin letters:   superscripts: ¹ ² ³ ⁴ ⁵ ⁶ ⁷ ⁸ ⁹ ⁰   subscripts: ₁ ₂ ₃ ₄ ₅ ₆ ₇ ₈ ₉ ₀   modifiers: ̂ ̃ ̄ ̈ ̧ ̆ ̇ ̃ ̉ ̌ ̨ ̷ ̳  greek letters:   superscripts: ᵝ ᵞ ᵟ ᵋ ᶿ   subscripts: ₀ ₁ ₂ ₃ ₄ ₅ ₆ ₇ ₈ ₉   modifiers: ̂ ̃ ̄ ̈ ̧ ̆ ̇ ̃ ̉ ̌ ̨ ̷ ̳)
+;; )
