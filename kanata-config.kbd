@@ -19,7 +19,7 @@
 (deflayer main
   _  _    _    _   _    _   _    _   _    _   _    _    _    _   @del
 @fn` @1   @2   @3   _    _    _    _    _    _    _    _    @=  @bspc
-  _    _    _    _    _    _    _    _    _    _    _    _    _   _
+  _    _    _    _    _    _    _    _    _    _    _    @[   _   _
   _     _    _    _    _    _    _    _    _    _    _    _       _ 
   _      _    _    _    _    _    _    _    _    _    _           _
   _      _    _              _              _    _   @←  @↑  @↓  @→
@@ -71,12 +71,13 @@
 (defalias 3 (tap-hold-release 200 200 3 (multi lalt (layer-while-held hold-1))))
 (deflayer hold-1
   _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
-  _   _    _   _  tab  esc   _    _    _   ret   _    _    _    _
+  _   _    _   _  @tab esc   _    _    _   ret   _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _   _
   _     _    _    _    _    _    _    _    _    _    _    _       _ 
   _      _    _    _    _    _    _    _    _    _    _           _ 
   _      _    _              lsft           _    _    _   _   _   _
 )
+(defalias tab (tap-hold-release 200 200 tab (macro⟳↑⤫ tab 200)))
 
 (defalias fn` (tap-hold-release 200 200 ` (multi nop0 (layer-while-held gate-3) (on-release release-vkey vkey-greek) (on-release release-vkey vkey-math) )))
 (defalias fn nop0)
@@ -109,33 +110,107 @@
 
 ;; ---------------------------------------------
 
-(defalias = (tap-hold-release 200 200 = (multi (layer-while-held arrows) (on-release release-vkey vkey-mouse))) )
+(defalias = (tap-hold-release 200 200 = (multi (layer-while-held arrows) (on-release release-vkey vkey-mouse) (on-release release-vkey vkey-scroll))) )
+(defalias [ (tap-hold-release 200 200 [ (multi (layer-while-held arrows) (on-release release-vkey vkey-mouse))) )
 (deflayer arrows
   _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
   _   _   lsft  _    _   esc  _      XX  XX  ret   XX   @=-  _    _
   _   C-q  C-w  C-e  C-r  C-t  C-y  @bspc @↑  @→    XX   _    _   _
   _    C-a  C-s  C-d  C-f   _    XX   @←   @↓   XX   XX   _       _ 
-  _     C-z  C-x  C-c  C-v   XX   @del XX   XX   XX   _           _ 
-  _      _    _            lsft             @fn  _    _   _   _   _
+  _     C-z  C-x  C-c  C-v   XX   @del XX   XX   XX   C-/         _ 
+  _      _    _            lsft             @mse _    _   _   _   _
 )
 
 (defalias =- (on-press toggle-vkey vkey-mouse))
+(defalias mse (tap-dance-eager 500 (
+  (macro (on-press release-vkey vkey-scroll) (on-press press-vkey vkey-mouse))
+  (macro (on-press release-vkey vkey-mouse) (on-press press-vkey vkey-scroll))
+  )
+))
+
 (defvirtualkeys vkey-mouse (layer-while-held mouse))
+(defvirtualkeys vkey-scroll (multi (layer-while-held mouse) (layer-while-held scroll)))
+
 (deflayer mouse
   _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
   _   _    _    _    _    _   🖰3    XX   XX   XX   _    _    _    _
-  _    _    _    _    _    _    XX  XX   @🖱↑  @🖱→   _    _    _   _
+  _    _    _    _    _    _    XX  XX   @🖱↑  @🖱→   XX   _    _   _
   _     _    _    _    _    _    XX  @🖱←  @🖱↓  XX    _    _       _ 
   _      _    _    _    _    XX  ‹🖰   🖰›   XX   _    _           _ 
-  _      _    _           _                 _    _    _   _   _   _
+  _      _    _           @mse-slow          _    _    _   _   _   _
+)
+(defalias
+  🖱↑  (🖱accel↑ 5 300 1 10)
+  🖱→  (🖱accel→ 5 300 1 10)
+  🖱←  (🖱accel← 5 300 1 10)
+  🖱↓  (🖱accel↓ 5 300 1 10)
+)
+(defalias mse-slow (layer-while-held mouse-slow))
+(deflayer mouse-slow
+  _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
+  _   _    _    _    _    _   _     _    _    _    _    _    _    _
+  _    _    _    _    _    _    _   _    @🖱s↑ @🖱s→  _    _    _   _
+  _     _    _    _    _    _    _   @🖱s← @🖱s↓ _     _    _       _ 
+  _      _    _    _    _    _   _    _    _    _    _           _ 
+  _      _    _               _             _    _    _   _   _   _
+)
+(defalias
+  🖱s↑  (🖱accel↑ 25 300 1 10)
+  🖱s→  (🖱accel→ 25 300 1 10)
+  🖱s←  (🖱accel← 25 300 1 10)
+  🖱s↓  (🖱accel↓ 25 300 1 10)
+)
+(defalias scroll-slow (layer-while-held scroll-slow))
+
+
+(deftemplate  accel-scroll (key-name actual-key)
+  (defvirtualkeys $key-name (macro⟳↑⤫ ($actual-key 1 250) 25))
+  (defalias $key-name
+    (multi
+      (macro-release-cancel
+        ($actual-key 1 25) 25 ($actual-key 1 25) 25 ($actual-key 1 25) 25 ($actual-key 1 25) 25 ($actual-key 1 25) 25 ($actual-key 1 25) 25 ($actual-key 1 25) 25 ($actual-key 1 25) 25 ($actual-key 1 25) 25 ($actual-key 1 25) 25 ($actual-key 1 25) 25 ($actual-key 1 50) 25 ($actual-key 1 50) 25 ($actual-key 1 50) 25 ($actual-key 1 50) 25 ($actual-key 1 50) 25 ($actual-key 1 50) 25 ($actual-key 1 50) 25 ($actual-key 1 50) 25 ($actual-key 1 50) 25 ($actual-key 1 100) 25 ($actual-key 1 100) 25 ($actual-key 1 100) 25 ($actual-key 1 100) 25 ($actual-key 1 100) 25 ($actual-key 1 100) 25 ($actual-key 1 100) 25 ($actual-key 1 100) 25 ($actual-key 1 150) 25 ($actual-key 1 150) 25 ($actual-key 1 150) 25 ($actual-key 1 250) 25 ($actual-key 1 250) 25 ($actual-key 1 250) 25 ($actual-key 1 250) 25 ($actual-key 1 250) 25 ($actual-key 1 250) 25 (on-press press-vkey $key-name)
+      )
+      (on-release release-vkey  $key-name)
+    )
+  )
+)
+(template-expand accel-scroll ☸↑ 🖱☸↑)
+(template-expand accel-scroll ☸→ 🖱☸→)
+(template-expand accel-scroll ☸← 🖱☸←)
+(template-expand accel-scroll ☸↓ 🖱☸↓)
+(deflayer scroll
+  _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
+  _   _    _    _    _    _   _     _    _   _   _    _    _    _
+  _    _    _    _    _    _    _   _     @☸↑   @☸→   _    _    _   _
+  _     _    _    _    _    _    _    @☸←   @☸↓  _     _    _       _ 
+  _      _    _    _    _    _  _   _   _   _    _           _ 
+  _      _    _         @scroll-slow                 _    _    _   _   _   _
+)
+(deftemplate  accel-scroll-slow (key-name actual-key)
+  (defvirtualkeys $key-name (macro⟳↑⤫ ($actual-key 1 50) 25))
+  (defalias $key-name
+    (multi
+      (macro-release-cancel
+        ($actual-key 1 5) 25 ($actual-key 1 5) 25 ($actual-key 1 5) 25 ($actual-key 1 5) 25 ($actual-key 1 5) 25 ($actual-key 1 5) 25 ($actual-key 1 5) 25 ($actual-key 1 5) 25 ($actual-key 1 5) 25 ($actual-key 1 5) 25 ($actual-key 1 5) 25 ($actual-key 1 10) 25 ($actual-key 1 10) 25 ($actual-key 1 10) 25 ($actual-key 1 10) 25 ($actual-key 1 10) 25 ($actual-key 1 10) 25 ($actual-key 1 10) 25 ($actual-key 1 10) 25 ($actual-key 1 10) 25 ($actual-key 1 20) 25 ($actual-key 1 20) 25 ($actual-key 1 20) 25 ($actual-key 1 20) 25 ($actual-key 1 20) 25 ($actual-key 1 20) 25 ($actual-key 1 20) 25 ($actual-key 1 20) 25 ($actual-key 1 30) 25 ($actual-key 1 30) 25 ($actual-key 1 30) 25 ($actual-key 1 50) 25 ($actual-key 1 50) 25 ($actual-key 1 50) 25 ($actual-key 1 50) 25 ($actual-key 1 50) 25 ($actual-key 1 50) 25 (on-press press-vkey $key-name)
+      )
+      (on-release release-vkey  $key-name)
+    )
+  )
+)
+(template-expand accel-scroll-slow ☸s↑ 🖱☸↑)
+(template-expand accel-scroll-slow ☸s→ 🖱☸→)
+(template-expand accel-scroll-slow ☸s← 🖱☸←)
+(template-expand accel-scroll-slow ☸s↓ 🖱☸↓)
+(deflayer scroll-slow
+  _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
+  _   _    _    _    _    _   _     _    _    _    _    _    _    _
+  _    _    _    _    _    _    _   _    @☸s↑ @☸s→  _    _    _   _
+  _     _    _    _    _    _    _   @☸s← @☸s↓ _     _    _       _ 
+  _      _    _    _    _    _   _    _    _    _    _           _ 
+  _      _    _               _             _    _    _   _   _   _
 )
 
-(defalias
-  🖱↑  (fork (fork (🖱accel↑ 5 300 1 10) (🖱☸↑ 25 120) (nop0)) (fork (🖱accel↑ 10 300 1 5) (🖱☸↑ 25 10) (nop0)) (lsft))
-  🖱→  (fork (fork (🖱accel→ 5 300 1 10) (🖱☸→ 25 120) (nop0)) (fork (🖱accel→ 10 300 1 5) (🖱☸→ 25 10) (nop0)) (lsft))
-  🖱←  (fork (fork (🖱accel← 5 300 1 10) (🖱☸← 25 120) (nop0)) (fork (🖱accel← 10 300 1 5) (🖱☸← 25 10) (nop0)) (lsft))
-  🖱↓  (fork (fork (🖱accel↓ 5 300 1 10) (🖱☸↓ 25 120) (nop0)) (fork (🖱accel↓ 10 300 1 5) (🖱☸↓ 25 10) (nop0)) (lsft))
-)
+
 ;; Either there is a bug of a hardware issue: the @fn` key works as fn for right and left but not for up and down. But the @fn key works for all of them.
 
 
