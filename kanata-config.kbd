@@ -70,11 +70,11 @@
 
 (deflayer empty-for-reference
   _    _   _    _   _    _   _    _   _    _  _    _    _   _   _  
-  _     _    _    _    _    _    _    _    _    _    _    _    _ _   
-  _      _    _    _    _    _    _    _    _    _    _    _    _ _ 
-  _       _    _    _    _    _    _    _    _    _    _    _    _  
-  _        _    _    _    _    _    _    _    _    _    _        _   
-  _      _    _             _               _    _    _    _  _    _    
+  _     _    _    _    _    _    _    _    _    _    _    _   _    _   
+  _      _    _    _    _    _    _    _    _    _    _    _   _   _ 
+  _       _    _    _    _    _    _    _    _    _    _    _      _  
+  _        _    _    _    _    _    _    _    _    _    _          _   
+  _        _    _             _               _    _    _   _  _   _    
 )
 (deflayer disabled-for-reference
   XX   XX  XX   XX  XX   XX  XX   XX  XX   XX XX   XX   XX  XX  XX 
@@ -115,10 +115,10 @@
 (defalias fn nop0)
 (deflayer hold-fn
   _    _   _    _   _    _   _    _   _    _  _    _    _   _   _  
-  _     _    _    _    _    _    _    _    _    _    _    _    _ _   
-  _      @fnQ _    _    @fnR @fnT _    _    _    _    _    _    _ (macro sldr \) 
+  _     _    _    _    _    _    @fn6 _    _    _    _   @fn-  _ _   
+  _      @fnQ _    _    @fnR @fnT _    _    _    _    _    _    _ @fn\
   _       _    _    _    _    _    _    _    _    @fnL _    _    _  
-  _        _    _    _    _    _    _    _    _    _    _        _   
+  _        _    _    _    _    _    _    _    _    _   @fn/       _   
   _      _    _             sldr            _    _    _    _  _    _    
 )
 
@@ -126,6 +126,10 @@
 (defalias fnR M-spc) ;; albert search
 (defalias fnQ lrld) ;; live reload kanata configuration
 (defalias fnL (macro sldr l a y o u t -)) ;; change kanata layout. Defined later
+(defalias fn\ (macro sldr \)) ;; tex
+(defalias fn/ (macro sldr /)) ;; ipa
+(defalias fn6 (macro sldr S-6)) ;; superscript
+(defalias fn- (macro sldr S--)) ;; subscript
 
 ;; esc releases all alternative layouts (declared later)
 (deftemplate def-sldr-layout (vk-name1 vk-name2 input-keys output-action)
@@ -133,11 +137,13 @@
   (defvirtualkeys $vk-name2 (on-press press-vkey $vk-name1))
   (defseq $vk-name2 $input-keys)
 )
-(template-expand def-sldr-layout layout-g layout--g  (l a y o u t - g)   (layer-while-held layout-greek)       )
-(template-expand def-sldr-layout layout-c layout--c  (l a y o u t - c)   (layer-while-held layout-mathcal)     )
-(template-expand def-sldr-layout layout-b layout--b  (l a y o u t - b)   (layer-while-held layout-mathbb)      )
+(template-expand def-sldr-layout layout-g layout--g  (l a y o u t - g  ) (layer-while-held layout-greek)       )
+(template-expand def-sldr-layout layout-c layout--c  (l a y o u t - c  ) (layer-while-held layout-mathcal)     )
+(template-expand def-sldr-layout layout-b layout--b  (l a y o u t - b  ) (layer-while-held layout-mathbb)      )
 (template-expand def-sldr-layout layout-^ layout--^  (l a y o u t - S-6) (layer-while-held layout-superscript) )
 (template-expand def-sldr-layout layout-_ layout--_  (l a y o u t - S--) (layer-while-held layout-subscript)   )
+(template-expand def-sldr-layout layout-k layout--k  (l a y o u t - k  ) (layer-while-held layout-keyboard)   )
+(template-expand def-sldr-layout layout-e layout--e  (l a y o u t - e  ) (layer-while-held layout-emoji)   )
 (defvirtualkeys vkey-layouts-release (macro
   ;; release all declared layouts and come to default
   (on-press release-vkey layout-g)
@@ -145,6 +151,8 @@
   (on-press release-vkey layout-b)
   (on-press release-vkey layout-^)
   (on-press release-vkey layout-_)
+  (on-press release-vkey layout-e)
+  (on-press release-vkey layout-k)
 ))
 
 
@@ -331,8 +339,28 @@
   _        🔣ₓ   _    🔣ₒ   🔣ᵥ   🔣ᵦ   🔣ₙ   🔣ₘ   _    _    _        _   
   _      _    _             _               _    _    _    _  _    _    
 )
-;; Pending: IPA and emoji layers
+(deflayer layout-keyboard
+  _  🔣🔇 🔣🔉 🔣🔊 🔣⌨ 🔣🔆 🔣🔅 _  _   _  _   _  _   🔣⎀   🔣⌦  
+  _     _    _    _    _    _    _    _    _    _    _   _   _   🔣⌫   
+  🔣↹      _    _    _    _    _    _    _    _    _    _   _   _   _ 
+  🔣⇪     _    _    _    _    _    _    _    _    _    _   _    🔣⏎  
+  🔣⇧      _    _    _    _    _    _    _    _    _    _        🔣⇧   
+  🔣☸     🔣❖  🔣⌥             🔣␣               _   🔣☸
+  (macro 🔣⇤ 🔣←) (macro 🔣⇞ 🔣↑) (macro 🔣⇟ 🔣↓) (macro 🔣⇥ 🔣→)
+)
+;; https://home.unicode.org/emoji/emoji-frequency/
+ 
 
+ 
+(deflayer layout-emoji
+  _    _   _    _   _    _   _    _   _    _  _    _    _   _   _  
+  _    🔣😂 🔣😉 🔣😍 🔣🤣 🔣😊 🔣🙏 🔣💕 🔣😭 🔣😘 _    _   _    _   
+  _     🔣❤️   🔣👍 🔣😅 🔣👏 🔣😁 🔣♥️ 🔣🔥 _    _    _    _   _   _ 
+  _       🔣💔 🔣💖 🔣💙 🔣😢 🔣🤔 🔣😆 🔣🙄 🔣💪 🔣☺️  _   _      _  
+  _        🔣👌 🔣🤗  _    _    _    _    _    _    _    _          _   
+  _        _    _             _               _    _    _   🔣👍 _   _    
+)
+;; Pending: IPA and emoji layers
 
 
 ;; ---------------------------------------------
@@ -496,7 +524,7 @@
 (template-expand def-seq 1/4           (1 / 4                       spc) (unicode ¼))
 (template-expand def-seq =:            (= S-;                       spc) (unicode ≕))
 (template-expand def-seq ^t            (S-6 t                       spc) (unicode ᵀ))
-(template-expand def-seq ^t            (S-6 S-t                     spc) (unicode ᵀ))
+(template-expand def-seq ^T            (S-6 S-t                     spc) (unicode ᵀ))
 (template-expand def-seq ^{-1}         (S-6 { - 1 }                 spc) (macro 🔣⁻🔣¹))
 (template-expand def-seq ^-1           (S-6 - 1                     spc) (macro 🔣⁻🔣¹))
 (template-expand def-seq ^+            (S-6 S-=                     spc) (unicode ⁺))
