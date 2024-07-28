@@ -159,8 +159,16 @@
 
 ;; ---------------------------------------------
 
-(defalias = (tap-hold-except-keys 200 200 = (multi (layer-while-held arrows) (on-release release-vkey vkey-mouse) (on-release release-vkey vkey-scroll)) (spc)) )
-(defalias [ (tap-hold-except-keys 200 200 [ (multi (layer-while-held arrows) (on-release release-vkey vkey-mouse) (on-release release-vkey vkey-scroll)) (])) )
+;; nop1 is arrows-lock
+(defalias = (tap-hold-except-keys 200 200 = (multi (layer-while-held arrows) (on-press press-vkey vkey-arrows-on) (on-release tap-vkey vkey-arrows-off-unless-locked)) (spc)) )
+(defalias [ (tap-hold-except-keys 200 200 [ (multi (layer-while-held arrows) (on-press press-vkey vkey-arrows-on) (on-release tap-vkey vkey-arrows-off-unless-locked)) (])) )
+
+(defvirtualkeys vkey-arrows-on (layer-while-held arrows))
+(defvirtualkeys vkey-arrows-lock (multi nop1 (layer-while-held arrows-lock)))
+(defvirtualkeys vkey-arrows-off (multi (on-press release-vkey vkey-arrows-lock) (on-press release-vkey vkey-arrows-on)))
+(defvirtualkeys vkey-arrows-off-unless-locked (fork (on-press tap-vkey vkey-arrows-off) XX (nop1)))
+(defalias arrows-off (on-press tap-vkey vkey-arrows-off))
+
 (deflayer arrows
   _    _   _    _   _    _   _    _   _    _  _    _    _   _   _  
   _     _    lsft _    _    esc  _    XX   XX   ret  XX   @=-  _ _   
@@ -169,8 +177,13 @@
   _        C-z  C-x  C-c  C-v  XX   @del XX   XX   XX   C-/      _   
   _      _    _             lsft            @mse _    _    _  _    _    
 )
+(deflayermap (arrows-lock)
+  - @arrows-off
+  = @arrows-off
+)
 
-(defalias =- (on-press toggle-vkey vkey-mouse))
+
+(defalias =- (on-press press-vkey vkey-arrows-lock))
 (defalias mse (tap-dance-eager 500 (
   (macro (on-press release-vkey vkey-scroll) (on-press press-vkey vkey-mouse))
   (macro (on-press release-vkey vkey-mouse) (on-press press-vkey vkey-scroll))
@@ -350,7 +363,6 @@
 )
 ;; https://home.unicode.org/emoji/emoji-frequency/
  
-
  
 (deflayer layout-emoji
   _    _   _    _   _    _   _    _   _    _  _    _    _   _   _  
@@ -358,7 +370,7 @@
   _     🔣❤️   🔣👍 🔣😅 🔣👏 🔣😁 🔣♥️ 🔣🔥 _    _    _    _   _   _ 
   _       🔣💔 🔣💖 🔣💙 🔣😢 🔣🤔 🔣😆 🔣🙄 🔣💪 🔣☺️  _   _      _  
   _        🔣👌 🔣🤗  _    _    _    _    _    _    _    _          _   
-  _        _    _             _               _    _    _   🔣👍 _   _    
+  _        _    _             _               _    _    _   🔣👍 🔣👎 _    
 )
 ;; Pending: IPA and emoji layers
 
@@ -594,4 +606,27 @@
 (template-expand def-seq ^123          (S-6 1 2 3                   spc) (macro 🔣¹ 🔣² 🔣³ 🔣⁴ 🔣⁵ 🔣⁶ 🔣⁷ 🔣⁸ 🔣⁹ 🔣⁰))
 ;; (defvirtualkeys
 ;;   ;;\superscripts (unicode latin letters:   superscripts: ¹ ² ³ ⁴ ⁵ ⁶ ⁷ ⁸ ⁹ ⁰   subscripts: ₁ ₂ ₃ ₄ ₅ ₆ ₇ ₈ ₉ ₀   modifiers: ̂ ̃ ̄ ̈ ̧ ̆ ̇ ̃ ̉ ̌ ̨ ̷ ̳  greek letters:   superscripts: ᵝ ᵞ ᵟ ᵋ ᶿ   subscripts: ₀ ₁ ₂ ₃ ₄ ₅ ₆ ₇ ₈ ₉   modifiers: ̂ ̃ ̄ ̈ ̧ ̆ ̇ ̃ ̉ ̌ ̨ ̷ ̳)
-;; )
+;; 
+(template-expand def-seq [Y]   ( S-9 y S-0    ) 🔣👍  ) ;; Thumbs Up 
+(template-expand def-seq [Y]2  ( sft 9 y 0    ) 🔣👍  ) ;; Thumbs Up 
+(template-expand def-seq [N]   ( S-9 n S-0    ) 🔣👎  ) ;; Thumbs Down 
+(template-expand def-seq [N]2  ( sft 9 n 0    ) 🔣👎  ) ;; Thumbs Down 
+(template-expand def-seq :]    ( S-; S-0      ) 🔣😊  ) ;; Smile 
+(template-expand def-seq :]2   ( sft ; 0      ) 🔣😊  ) ;; Smile 
+(template-expand def-seq :[    ( S-; S-9      ) 🔣☹️  ) ;; Sad 
+(template-expand def-seq :[2   ( sft ; 9      ) 🔣☹️  ) ;; Sad 
+(template-expand def-seq ;]    ( ; S-0        ) 🔣😉  ) ;; Wink 
+(template-expand def-seq :D    ( S-; d        ) 🔣😃  ) ;; Laugh 
+(template-expand def-seq :P    ( S-; p        ) 🔣😛  ) ;; Tongue Out 
+(template-expand def-seq [A]   ( S-9 a S-0    ) 🔣😇  ) ;; Angel 
+(template-expand def-seq [A]2  ( sft 9 a 0    ) 🔣😇  ) ;; Angel 
+(template-expand def-seq :'[   ( S-; ' S-9    ) 🔣😢  ) ;; Cry 
+(template-expand def-seq >:[   ( S-. S-; S-9  ) 🔣😡  ) ;; Angry 
+(template-expand def-seq >:[2  ( sft . ; 9    ) 🔣😡  ) ;; Angry 
+(template-expand def-seq B-]   ( b - S-0      ) 🔣😎  ) ;; Cool 
+(template-expand def-seq ;P    ( ; p          ) 🔣😜  ) ;; Stuck Out Tongue Winking Eye 
+(template-expand def-seq |-]   ( S-\ - S-0    ) 🔣😴  ) ;; Sleepy 
+(template-expand def-seq think  (t h i n k      ) 🔣🤔)
+(template-expand def-seq monkey (m o n k e y    ) (macro 🔣🙈️ 🔣🙊️ 🔣🙉️ 🔣🐵️))
+(template-expand def-seq ok     (o k            ) 🔣👌)
+(template-expand def-seq haha   (h a h a        ) (macro 🔣😂 🔣🤣))
