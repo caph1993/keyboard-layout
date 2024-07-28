@@ -3,8 +3,8 @@
   danger-enable-cmd yes
   movemouse-inherit-accel-state yes
   movemouse-smooth-diagonals yes
-  ;; sequence-input-mode visible-backspaced ;; shows the sequence as it is typed
-  sequence-input-mode hidden-delay-type ;; hides while typing. Outputs if invalid
+  sequence-input-mode visible-backspaced ;; shows the sequence as it is typed
+  ;; sequence-input-mode hidden-delay-type ;; hides while typing. Outputs if invalid
   sequence-timeout 8000 ;; 8 seconds maximum between key presses in sldr sequence
 )
 (defsrc
@@ -55,12 +55,12 @@
   _      _    _             _               _    _    @←   @↑ @↓   @→   
 )
 ;; nop0 is "fn" button
-(defalias ← (fork left  home (nop0)))
-(defalias ↑ (fork up    ⇞    (nop0)))
-(defalias ↓ (fork down  ⇟    (nop0)))
-(defalias → (fork right end  (nop0)))
-(defalias bspc (fork bspc del  (nop0)))
-(defalias del  (fork del  bspc (nop0)))
+(defalias ← (fork left  home   (nop0)))
+(defalias ↑ (fork up    ⇞      (nop0)))
+(defalias ↓ (fork down  ⇟      (nop0)))
+(defalias → (fork right end    (nop0)))
+(defalias bspc (fork bspc (macro S-home bspc) (nop0)))
+(defalias del  (fork del  (macro S-end  del ) (nop0)))
 (defalias esc (multi esc (on-press tap-vkey vkey-layouts-release)))
 
 (defoverrides
@@ -84,7 +84,7 @@
   XX       XX   XX   XX   XX   XX   XX   XX   XX   XX   XX       XX  
   XX     XX   XX            XX              XX   XX   XX   XX XX   XX   
 )
-;; (defalias - (tap-hold-release 200 200 - (layer-while-held numbers-only)))
+;; (defalias - (tap-hold-press 200 200 - (layer-while-held numbers-only)))
 ;; (deflayer numbers-only
 ;;   _  _    _    _   _    _   _    _   _    _   _    _    _    _   _
 ;;   grv 1    2    3    4    5    6    7    8    9    0    -    = bspc
@@ -97,11 +97,11 @@
 ;; ---------------------------------------------
 ;; grv on press, lctl on hold
 
-(defalias ` (tap-hold-release 200 200 ` (multi lctl (layer-while-held hold-1))))
-(defalias 1 (tap-hold-release 200 200 1 (multi lalt (layer-while-held hold-1))))
-(defalias 2 (tap-hold-release 200 200 2 (multi lsft (layer-while-held hold-1))))
-(defalias 3 (tap-hold-release 200 200 3 (multi nop0 (layer-while-held hold-1) (layer-while-held hold-fn))))
-(defalias 6 (tap-hold-release 200 200 6 (multi lmet (layer-while-held hold-1))))
+(defalias ` (tap-hold-press 200 200 ` (multi lctl (layer-while-held hold-1))))
+(defalias 1 (tap-hold-press 200 200 1 (multi lalt (layer-while-held hold-1))))
+(defalias 2 (tap-hold-press 200 200 2 (multi lsft (layer-while-held hold-1))))
+(defalias 3 (tap-hold-press 200 200 3 (multi nop0 (layer-while-held hold-1) (layer-while-held hold-fn))))
+(defalias 6 (tap-hold-press 200 200 6 (multi lmet (layer-while-held hold-1))))
 (deflayer hold-1
   _    _   _    _   _    _   _    _   _    _  _    _    _   _   _  
   _     _    _    _    @tab @esc _    _    _    ret  _    _    _ _   
@@ -110,7 +110,7 @@
   _        _    _    _    _    _    _    _    _    _    _        _   
   _      _    _             lsft            _    _    _    _  _    _    
 )
-(defalias tab (tap-hold-release 200 200 tab (macro⟳↑⤫ tab 200)))
+(defalias tab (tap-hold-press 200 200 tab (macro⟳↑⤫ tab 200)))
 
 (defalias fn nop0)
 (deflayer hold-fn
@@ -159,8 +159,8 @@
 
 ;; ---------------------------------------------
 
-(defalias = (tap-hold-release 200 200 = (multi (layer-while-held arrows) (on-release release-vkey vkey-mouse) (on-release release-vkey vkey-scroll))) )
-(defalias [ (tap-hold-release 200 200 [ (multi (layer-while-held arrows) (on-release release-vkey vkey-mouse))) )
+(defalias = (tap-hold-except-keys 200 200 = (multi (layer-while-held arrows) (on-release release-vkey vkey-mouse) (on-release release-vkey vkey-scroll)) (spc)) )
+(defalias [ (tap-hold-except-keys 200 200 [ (multi (layer-while-held arrows) (on-release release-vkey vkey-mouse) (on-release release-vkey vkey-scroll)) (])) )
 (deflayer arrows
   _    _   _    _   _    _   _    _   _    _  _    _    _   _   _  
   _     _    lsft _    _    esc  _    XX   XX   ret  XX   @=-  _ _   
