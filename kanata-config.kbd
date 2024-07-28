@@ -163,15 +163,23 @@
 (defalias = (tap-hold-except-keys 200 200 = (multi (layer-while-held arrows) (on-press press-vkey vkey-arrows-on) (on-release tap-vkey vkey-arrows-off-unless-locked)) (spc)) )
 (defalias [ (tap-hold-except-keys 200 200 [ (multi (layer-while-held arrows) (on-press press-vkey vkey-arrows-on) (on-release tap-vkey vkey-arrows-off-unless-locked)) (])) )
 
+
 (defvirtualkeys vkey-arrows-on (layer-while-held arrows))
 (defvirtualkeys vkey-arrows-lock (multi nop1 (layer-while-held arrows-lock)))
-(defvirtualkeys vkey-arrows-off (multi (on-press release-vkey vkey-arrows-lock) (on-press release-vkey vkey-arrows-on)))
+(defvirtualkeys vkey-mouse (layer-while-held mouse))
+(defvirtualkeys vkey-scroll (multi (layer-while-held mouse) (layer-while-held scroll)))
+(defvirtualkeys vkey-arrows-off (multi
+  (on-press release-vkey vkey-arrows-lock)
+  (on-press release-vkey vkey-arrows-on)
+  (on-press release-vkey vkey-mouse)
+  (on-press release-vkey vkey-scroll)
+))
 (defvirtualkeys vkey-arrows-off-unless-locked (fork (on-press tap-vkey vkey-arrows-off) XX (nop1)))
 (defalias arrows-off (on-press tap-vkey vkey-arrows-off))
 
 (deflayer arrows
   _    _   _    _   _    _   _    _   _    _  _    _    _   _   _  
-  _     _    lsft _    _    esc  _    XX   XX   ret  XX   @=-  _ _   
+  _     _    _   _    _    esc  _    XX   XX   ret  XX   @=-  _ _   
   _      C-q  C-w  C-e  C-r  C-t  C-y  @bspc @↑   @→   XX   _    _ _ 
   _       C-a  C-s  C-d  C-f  _    XX   @←   @↓   XX   XX   _    _  
   _        C-z  C-x  C-c  C-v  XX   @del XX   XX   XX   C-/      _   
@@ -190,8 +198,6 @@
   )
 ))
 
-(defvirtualkeys vkey-mouse (layer-while-held mouse))
-(defvirtualkeys vkey-scroll (multi (layer-while-held mouse) (layer-while-held scroll)))
 
 (deflayer mouse
   _    _   _    _   _    _   _    _   _    _  _    _    _   _   _  
