@@ -48,11 +48,11 @@
 
 (deflayer main
   @esc  _   _    _   _    _   _    _   _    _  _    _    _   _   @del 
-  @`    @1   @2   @3   _    _    @6   _    _    _    _    _    @= @bspc 
-  _      _    _    _    _    _    _    _    _    _    _    @[   _ _ 
-  _       _    _    _    _    _    _    _    _    _    _    _    _  
+  @`   @1    @2   @3   _    _    @6   _    _    _    _    _    @= @bspc 
+  @tab   _    _    _    _    _    _    _    _    _    _    @[   _ _ 
+  _       _    _    _    _    _    _    _    _    _    _    _     _  
   _        _    _    _    _    _    _    _    _    _    _        _   
-  _      _    _             _               _    _    @←   @↑ @↓   @→   
+  _      _    @lalt           _               _    _    @← @↑ @↓ @→   
 )
 ;; nop0 is "fn" button
 (defalias ← (fork left  home   (nop0)))
@@ -62,6 +62,8 @@
 (defalias bspc (fork bspc (macro S-home bspc) (nop0)))
 (defalias del  (fork del  (macro S-end  del ) (nop0)))
 (defalias esc (multi esc (on-press tap-vkey vkey-layouts-release)))
+(defalias lalt (multi lalt (layer-while-held hold-lalt)))
+(deflayermap (hold-lalt) 4 @tab 5 @esc)
 
 (defoverrides
   (lsft bspc) (del)
@@ -98,19 +100,21 @@
 ;; grv on press, lctl on hold
 
 (defalias ` (tap-hold-press 200 200 ` (multi lctl (layer-while-held hold-1))))
-(defalias 1 (tap-hold-press 200 200 1 (multi lalt (layer-while-held hold-1))))
+(defalias 1 (tap-hold-press 200 200 1 (multi lctl (layer-while-held hold-1))))
+(defalias tab (tap-hold-press 200 200 tab (multi lctl (layer-while-held hold-1))))
 (defalias 2 (tap-hold-press 200 200 2 (multi lsft (layer-while-held hold-1))))
 (defalias 3 (tap-hold-press 200 200 3 (multi nop0 (layer-while-held hold-1) (layer-while-held hold-fn))))
 (defalias 6 (tap-hold-press 200 200 6 (multi lmet (layer-while-held hold-1))))
+
 (deflayer hold-1
   _    _   _    _   _    _   _    _   _    _  _    _    _   _   _  
-  _     _    _    _    @tab @esc _    _    _    ret  _    _    _ _   
+  _     _    _    _   @tab2 @esc _    _    _    ret  _    _    _ _   
   _      _    _    _    _    _    _    _    _    _    _    _    _ _ 
   _       _    _    _    _    _    _    _    _    _    _    _    _  
   _        _    _    _    _    _    _    _    _    _    _        _   
-  _      _    _             lsft            _    _    _    _  _    _    
+  _      _    _              _              _    _    _    _  _    _    
 )
-(defalias tab (tap-hold-press 200 200 tab (macro⟳↑⤫ tab 200)))
+(defalias tab2 (tap-hold-press 200 200 tab (macro⟳↑⤫ tab 200)))
 
 (defalias fn nop0)
 (deflayer hold-fn
@@ -160,9 +164,18 @@
 ;; ---------------------------------------------
 
 ;; nop1 is arrows-lock
-(defalias = (tap-hold-except-keys 200 200 = (multi (layer-while-held arrows) (on-press press-vkey vkey-arrows-on) (on-release tap-vkey vkey-arrows-off-unless-locked)) (spc)) )
-(defalias [ (tap-hold-except-keys 200 200 [ (multi (layer-while-held arrows) (on-press press-vkey vkey-arrows-on) (on-release tap-vkey vkey-arrows-off-unless-locked)) (])) )
+(deftemplate def-arrow-hold (key tap-if-quickly-followed-by)
+  (defalias $key (tap-hold-press 200 200 $key (tap-hold-except-keys 1 1 $key (multi
+    (layer-while-held arrows)
+    (on-press press-vkey vkey-arrows-on)
+    (on-release tap-vkey vkey-arrows-off-unless-locked)
+  ) $tap-if-quickly-followed-by)))
+)
+(template-expand def-arrow-hold = (spc))
+(template-expand def-arrow-hold [ (spc ] 0 - 1))
 
+;; (defalias = (tap-hold-press 200 200 = (multi (layer-while-held arrows) (on-press press-vkey vkey-arrows-on) (on-release tap-vkey vkey-arrows-off-unless-locked))) )
+;; (defalias [ (tap-hold-press 200 200 [ (multi (layer-while-held arrows) (on-press press-vkey vkey-arrows-on) (on-release tap-vkey vkey-arrows-off-unless-locked))) )
 
 (defvirtualkeys vkey-arrows-on (layer-while-held arrows))
 (defvirtualkeys vkey-arrows-lock (multi nop1 (layer-while-held arrows-lock)))
