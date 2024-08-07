@@ -275,7 +275,7 @@
   _      _    _    _    _    _    XX   XX   @🖱↑  @🖱→  XX   _    _ _ 
   _       _    _    _    _    _    XX   @🖱←  @🖱↓  XX   _    _    _  
   _        _    _    _    _    XX   ‹🖰   🖰›   XX   _    _        _   
-  _      _    _             @mse-slow       (layer-while-held scroll) _    _    _  _    _    
+  _      _    _  (layer-while-held scroll) @mse-slow _    _    _  _    _    
 )
 (defalias
   🖱↑  (🖱accel↑ 5 300 1 10)
@@ -315,7 +315,7 @@
   _      _    _    _    _    _    _    _    @☸↑  @☸→  _    _    _ _ 
   _       _    _    _    _    _    _    @☸←  @☸↓  _    _    _    _  
   _        _    _    _    _    _    _    _    _    _    _        _   
-  _      _    _             @scroll-slow    _    _    _    _  _    _    
+  _      _    _             _          @scroll-slow  _    _    _  _    _    
 )
 (deftemplate  accel-scroll-slow (key-name actual-key)
   (defvirtualkeys $key-name (macro⟳↑⤫ ($actual-key 1 50) 25))
