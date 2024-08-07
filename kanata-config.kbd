@@ -172,38 +172,22 @@
 
 ;; ---------------------------------------------
 
-;; nop1 is arrows-lock
+(defalias arrow-hold (multi
+  (on-press release-vkey vkey-lock)
+  (on-press release-vkey vkey-mouse)
+  (on-press tap-vkey vkey-arrows)
+  (layer-while-held arrows)
+  (on-release tap-vkey vkey-arrows-mouse-off-unless-locked)
+))
 (deftemplate def-arrow-hold (key tap-out tap-if-quickly-followed-by)
-  (defalias $key (tap-hold-press 200 200 $tap-out (tap-hold-except-keys 1 1 $tap-out (multi
-    (layer-while-held arrows)
-    (on-press tap-vkey vkey-arrows)
-    (on-press release-vkey vkey-lock)
-    (on-release tap-vkey vkey-arrows-mouse-off-unless-locked)
-  ) $tap-if-quickly-followed-by)))
+  (defalias $key (tap-hold-press 200 200 (fork $tap-out @arrow-hold (nop2))
+  (tap-hold-except-keys 1 1 $tap-out @arrow-hold $tap-if-quickly-followed-by)))
 )
 (template-expand def-arrow-hold =  = (spc))
-(template-expand def-arrow-hold [  [ (spc ] 0 - 1))
-;; (defalias caps (tap-dance-eager 500 (
-;;   (tap-hold 200 200
-;;     ;; single tap
-;;     (on-press tap-vkey vkey-arrows-mouse-off)
-;;     ;; hold
-;;     (multi
-;;       (layer-while-held arrows)
-;;       (on-press press-vkey vkey-arrows)
-;;       (on-release tap-vkey vkey-arrows-mouse-off-unless-locked)
-;;     ))
-;;   ;; double tap (after executing first tap)
-;;   (macro (on-press press-vkey vkey-arrows) (on-press press-vkey vkey-arrows-lock))
-;;   ;; third and foruth taps (after executing the previous taps...)
-;;   (macro (on-press release-vkey vkey-scroll) (on-press press-vkey vkey-mouse))
-;;   (macro (on-press release-vkey vkey-mouse) (on-press press-vkey vkey-scroll))
-;;   )
-;; ))
+(template-expand def-arrow-hold [  [ (spc))
 (defalias caps (tap-dance-eager 200 (
   (tap-hold 200 200
     ;; single tap
-    ;; (fork (on-press press-vkey vkey-mouse)  (on-press tap-vkey vkey-arrows-mouse-off) (nop1))
     (on-press tap-vkey vkey-arrows-mouse-off)
     ;; hold
     (multi (layer-while-held mouse) (on-release tap-vkey vkey-arrows-mouse-off-unless-locked))
@@ -218,11 +202,6 @@
   ;; ;; triple tap (after executing first and second tap)
   (macro (on-press press-vkey vkey-arrows-mouse-off) lrld)
 )))
-
-
-;; (defalias = (tap-hold-press 200 200 = (multi (layer-while-held arrows) (on-press press-vkey vkey-arrows) (on-release tap-vkey vkey-arrows-mouse-off-unless-locked))) )
-;; (defalias [ (tap-hold-press 200 200 [ (multi (layer-while-held arrows) (on-press press-vkey vkey-arrows) (on-release tap-vkey vkey-arrows-mouse-off-unless-locked))) )
-
 
 ;; nop1 is pressed along with arrows or mouse layers
 (defvirtualkeys vkey-arrows (multi nop1 (layer-while-held arrows)))
@@ -242,8 +221,8 @@
 ;; (defalias arrows-mouse-off (on-press tap-vkey vkey-arrows-mouse-off))
 (deflayer arrows
   @esc2 _   _    _   _    _   _    _   _    _   _   _    _   _    _  
-  _     _   lsft  _    tab  esc  XX   @alck ret  XX   @del _    _  _   
-  _      C-q C-w  C-e  C-r  C-t  C-y   @bspc @↑   @→   @→→  _   _ @fn\ 
+  _     _   lsft  _    tab  esc  XX    _    ret  XX   @del @alck _ _   
+  _      C-q C-w  C-e  C-r  C-t  C-y   @bspc @↑   @→   @→→  _  _ @fn\ 
   _       C-a C-s  C-d  C-f  C-g   @←←  @←    @↓   XX   XX   _     _  
   _        C-z C-x  C-c  C-v  C-b   XX   XX    @CS↓   XX   C-/     _   
   _      _    _             lsft                lctl  _    _  _ _  _    
@@ -256,15 +235,21 @@
   (macro (on-press press-vkey vkey-lock) (on-press press-vkey vkey-arrows) (on-press release-vkey vkey-mouse) )
   (macro (on-press release-vkey vkey-lock) (on-press release-vkey vkey-mouse) (on-press release-vkey vkey-arrows) )
 )))
+;; (defalias aulck (multi
+;;   (on-press release-vkey vkey-lock)
+;;   (on-press release-vkey vkey-mouse)
+;;   (layer-while-held arrows)
+;;   (on-release tap-vkey vkey-arrows-mouse-off-unless-locked))
+;; )
 
 (defalias CS↓ C-S-down)
-(defalias ←← (fork C-left (unmod (ctl) home) (ctl)))
-(defalias →→ (fork C-right (unmod (ctl) end) (ctl)))
+(defalias ←← (fork C-left (unmod (lctl rctl) home) (lctl rctl ctl)))
+(defalias →→ (fork C-right (unmod (lctl rctl) end) (lctl rctl ctl)))
 (defalias esc2 (multi esc lrld))
 (deflayer mouse
   _    _   _    _   _    _   _    _   _    _  _    _    _   _   _  
-  _     _    _    _    _    _    🖰3   _   XX   XX   _    _    _ _   
-  _      _    _    _    _    _    XX   XX   @🖱↑  @🖱→  XX   _    _ _ 
+  _     _    _    _    _    _    🖰3   _   XX   XX   _    _  _ _   
+  _      _    _    _    _    _    XX   XX   @🖱↑  @🖱→  XX   _ _ _ 
   _       _    _    _    _    _    XX   @🖱←  @🖱↓  XX   _    _    _  
   _        _    _    _    _    XX   ‹🖰   🖰›   XX   _    _        _   
   _      _    _  (layer-while-held scroll) @mse-slow _    _    _  _    _    
