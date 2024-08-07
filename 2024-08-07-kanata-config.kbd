@@ -60,12 +60,12 @@
 ;; finally, arrows can be locked by taping - or p immediately after holding 3, = or [.
 
 (deflayer main
-  @esc _   _    _   _    _   _    _   _    _  _    _    _   _   @del 
+  @esc  _   _    _   _    _   _    _   _    _  _    _    _   _   @del 
   @`    _    @2   @3   _    _    @6   _    _    _    _    _    @= @bspc 
   @tab   _    _    _    _    _    _    _    _    _    _    @[   _ _ 
-  @caps   _    _    _    _    _    _    _    _    _    _    _    _  
+  @caps   _    _    _    _    _    _    _    _    _    _    _     _  
   _        _    _    _    _    _    _    _    _    _    _        _   
-  _      _    @lalt         _               _    _    @←   @↑ @↓   @→   
+  _      _    @lalt           _               _    _    @← @↑ @↓ @→   
 )
 ;; nop0 is "fn" button
 (defalias ← (fork left  home   (nop0)))
@@ -86,11 +86,11 @@
 
 (deflayer empty-for-reference
   _    _   _    _   _    _   _    _   _    _  _    _    _   _   _  
-  _     _    _    _    _    _    _    _    _    _    _    _    _ _   
-  _      _    _    _    _    _    _    _    _    _    _    _    _ _ 
-  _       _    _    _    _    _    _    _    _    _    _    _    _  
-  _        _    _    _    _    _    _    _    _    _    _        _   
-  _      _    _             _               _    _    _    _  _    _    
+  _     _    _    _    _    _    _    _    _    _    _    _   _    _   
+  _      _    _    _    _    _    _    _    _    _    _    _   _   _ 
+  _       _    _    _    _    _    _    _    _    _    _    _      _  
+  _        _    _    _    _    _    _    _    _    _    _          _   
+  _        _    _             _               _    _    _   _  _   _    
 )
 (deflayer disabled-for-reference
   XX   XX  XX   XX  XX   XX  XX   XX  XX   XX XX   XX   XX  XX  XX 
@@ -124,12 +124,12 @@
 (defalias 6 (tap-hold-press 200 200 6 (multi lmet (layer-while-held hold-1))))
 
 (deflayer hold-1
-  _    _   _    _   _    _   _    _   _    _  _    _    _   _   _  
-  _     _    _    _    @tab2 @esc _    _    ret  _    _    _    _ _   
-  _      _    _    _    _    _    _    _    _    _    _    _    _ _ 
-  _       _    _    _    _    _    _    _    _    _    _    _    _  
-  _        _    _    _    _    _    _    _    _    _    _        _   
-  _      _    _             _               _    _    _    _  _    _    
+  _    _   _    _   _    _   _    _   _    _  _    _    _   _   _
+  _     _    _    _   @tab2 @esc _    _    ret  _    _    _    _ _
+  _      _    _    _    _    _    _    _    _    _    _    _    _ _
+  _       _    _    _    _    _    _    _    _    _    _    _    _
+  _        _    _    _    _    _    _    _    _    _    _        _
+  _      _    _              _              _    _    _    _  _    _
 )
 (defalias tab2 (tap-hold-press 200 200 tab (macro⟳↑⤫ tab 200)))
 
@@ -176,8 +176,7 @@
 (deftemplate def-arrow-hold (key tap-out tap-if-quickly-followed-by)
   (defalias $key (tap-hold-press 200 200 $tap-out (tap-hold-except-keys 1 1 $tap-out (multi
     (layer-while-held arrows)
-    (on-press tap-vkey vkey-arrows)
-    (on-press release-vkey vkey-arrows-lock)
+    (on-press press-vkey vkey-arrows-on)
     (on-release tap-vkey vkey-arrows-off-unless-locked)
   ) $tap-if-quickly-followed-by)))
 )
@@ -190,74 +189,60 @@
 ;;     ;; hold
 ;;     (multi
 ;;       (layer-while-held arrows)
-;;       (on-press press-vkey vkey-arrows)
+;;       (on-press press-vkey vkey-arrows-on)
 ;;       (on-release tap-vkey vkey-arrows-off-unless-locked)
 ;;     ))
 ;;   ;; double tap (after executing first tap)
-;;   (macro (on-press press-vkey vkey-arrows) (on-press press-vkey vkey-arrows-lock))
+;;   (macro (on-press press-vkey vkey-arrows-on) (on-press press-vkey vkey-arrows-lock))
 ;;   ;; third and foruth taps (after executing the previous taps...)
 ;;   (macro (on-press release-vkey vkey-scroll) (on-press press-vkey vkey-mouse))
 ;;   (macro (on-press release-vkey vkey-mouse) (on-press press-vkey vkey-scroll))
 ;;   )
 ;; ))
-(defalias caps (tap-dance-eager 200 (
+(defalias caps (tap-dance-eager 500 (
   (tap-hold 200 200
     ;; single tap
-    (fork (on-press press-vkey vkey-arrows)  (on-press tap-vkey vkey-arrows-off) (nop1))
+    (on-press release-vkey vkey-mouse-hold)
     ;; hold
-    (multi (layer-while-held arrows) (on-release tap-vkey vkey-arrows-off-unless-locked))
+    (multi (layer-while-held mouse) (on-release release-vkey vkey-mouse-hold))
   )
-  ;; ;; double tap (after executing first tap)
-  (tap-hold 200 200
-    ;; single tap
-    (macro (on-press press-vkey vkey-mouse) (on-press release-vkey vkey-arrows))
-    ;; hold
-    (multi (layer-while-held mouse) (on-release tap-vkey vkey-arrows-off))
-  )
-  ;; ;; triple tap (after executing first and second tap)
-  (tap-hold 200 200 
-    ;; single tap
-    (macro (on-press press-vkey vkey-scroll) (on-press release-vkey vkey-arrows))
-    ;; hold
-    (multi (layer-while-held scroll) (on-release tap-vkey vkey-arrows-off))
-  )
+  ;; double tap (after executing first tap)
+  (macro (on-press press-vkey vkey-mouse-hold))
+  ;; triple tap (after executing first and second tap)
+  (macro (on-press press-vkey vkey-mouse-hold))
 )))
+(defvirtualkeys vkey-mouse-hold (layer-while-held mouse))
 
 
-;; (defalias = (tap-hold-press 200 200 = (multi (layer-while-held arrows) (on-press press-vkey vkey-arrows) (on-release tap-vkey vkey-arrows-off-unless-locked))) )
-;; (defalias [ (tap-hold-press 200 200 [ (multi (layer-while-held arrows) (on-press press-vkey vkey-arrows) (on-release tap-vkey vkey-arrows-off-unless-locked))) )
+;; (defalias = (tap-hold-press 200 200 = (multi (layer-while-held arrows) (on-press press-vkey vkey-arrows-on) (on-release tap-vkey vkey-arrows-off-unless-locked))) )
+;; (defalias [ (tap-hold-press 200 200 [ (multi (layer-while-held arrows) (on-press press-vkey vkey-arrows-on) (on-release tap-vkey vkey-arrows-off-unless-locked))) )
 
-
-;; nop1 is pressed along with arrows or mouse or scroll layers
-(defvirtualkeys vkey-arrows (multi nop1 (layer-while-held arrows)))
-(defvirtualkeys vkey-mouse (multi nop1 (layer-while-held mouse)))
-(defvirtualkeys vkey-scroll (multi nop1 (layer-while-held mouse) (layer-while-held scroll)))
-
-;; nop2 is pressed if the layers are locked with a special locking key
-(defvirtualkeys vkey-arrows-lock (multi nop2 (on-press press-vkey vkey-arrows)))
-
+(defvirtualkeys vkey-arrows-on (multi (layer-while-held arrows)))
+(defvirtualkeys vkey-arrows-lock (multi nop1 (layer-while-held arrows) (layer-while-held arrows-lock)))
+(defvirtualkeys vkey-mouse (layer-while-held mouse))
+(defvirtualkeys vkey-scroll (multi (layer-while-held mouse) (layer-while-held scroll)))
 (defvirtualkeys vkey-arrows-off (multi
-  (on-press release-vkey vkey-arrows)
+  (on-press release-vkey vkey-arrows-lock)
+  (on-press release-vkey vkey-arrows-on)
   (on-press release-vkey vkey-mouse)
   (on-press release-vkey vkey-scroll)
-  (on-press release-vkey vkey-arrows-lock)
 ))
-(defvirtualkeys vkey-arrows-off-unless-locked (fork (on-press tap-vkey vkey-arrows-off) XX (nop2)))
+(defvirtualkeys vkey-arrows-off-unless-locked (fork (on-press tap-vkey vkey-arrows-off) XX (nop1)))
 (defalias arrows-off (on-press tap-vkey vkey-arrows-off))
 (deflayer arrows
-  @esc2 _   _    _   _    _   _    _   _    _  _    _    _   _   _  
-  _     _   lsft  _    tab  esc  XX   @alck ret  XX   @del _    _ _   
-  _      C-q C-w  C-e  C-r  C-t  C-y   @bspc @↑   @→   @→→  _   _ @fn\ 
-  _       C-a C-s  C-d  C-f  C-g   @←←  @←    @↓   XX   XX   _    _  
-  _        C-z C-x  C-c  C-v  C-b   home  end   XX   XX   C-/     _   
-  _      _    _             lsft            _    _    _    _  _   _    
+  _    _   _    _   _    _   _    _   _    _  _    _    _   _   _  
+  _     _    lsft _    _    esc  _    XX   XX   ret  XX   @=-  _  _
+  _      _    _    ret  _    _    _    @bspc @↑  @→   XX   _   _  _
+  _       _    _    _    _    _    XX   @←    @↓  XX   XX   _     _
+  _        _    _    _    _    XX   @del XX   XX   XX   C-/       _
+  _      _    _             lsft               _    _    _  _  _  _    
+)
+(deflayermap (arrows-lock)
+  - @arrows-off
+  = @arrows-off
 )
 
-;; (defalias alck (on-press press-vkey vkey-arrows-lock))
-(defalias alck (fork (on-press press-vkey vkey-arrows-lock) (on-press tap-vkey vkey-arrows-off) (nop2)))
-(defalias ←← C-left)
-(defalias →→ C-right)
-(defalias esc2 (multi esc lrld))
+(defalias =- (on-press press-vkey vkey-arrows-lock))
 ;; (defalias mse (tap-dance-eager 500 (
 ;;   (tap-hold-press 200 200
 ;;     ;; single tap : lock scroll
@@ -275,7 +260,7 @@
   _      _    _    _    _    _    XX   XX   @🖱↑  @🖱→  XX   _    _ _ 
   _       _    _    _    _    _    XX   @🖱←  @🖱↓  XX   _    _    _  
   _        _    _    _    _    XX   ‹🖰   🖰›   XX   _    _        _   
-  _      _    _             @mse-slow       (layer-while-held scroll) _    _    _  _    _    
+  _      _    _             @mse-slow       (layer-while-held scroll)    _    _    _  _    _    
 )
 (defalias
   🖱↑  (🖱accel↑ 5 300 1 10)
@@ -376,7 +361,7 @@
   _     _    _    _    _    _    _    _    _    _    _    _    _ _   
   _      🔣𝓠   🔣𝓦   🔣𝓔   🔣𝓡   🔣𝓣   🔣𝓨   🔣𝓤   🔣𝓘   🔣𝓞   🔣𝓟   _    _ _ 
   _       🔣𝓐   🔣𝓢   🔣𝓓   🔣𝓕   🔣𝓖   🔣𝓗   🔣𝓙   🔣𝓚   🔣𝓛   _    _    _  
-  @SC      🔣𝓩   🔣𝓧   🔣𝓒   🔣𝓥   🔣𝓑   🔣𝓝   🔣𝓜   _    _    _        @SC 
+  @SC      🔣𝓩   🔣𝓧   🔣𝓒   🔣𝓥   🔣𝓑   🔣𝓝   🔣𝓜   _    _    _        @SC
   _      _    _             _               _    _    _    _  _    _    
 )
 (defalias SC (layer-while-held layout-mathcal-lower))
@@ -393,7 +378,7 @@
   _     _    _    _    _    _    _    _    _    _    _    _    _ _   
   _      🔣ℚ   🔣𝕎   🔣𝔼   🔣ℝ   🔣𝕋   🔣𝕐   🔣𝕌   🔣𝕀   🔣𝕆   🔣ℙ   _    _ _ 
   _       🔣𝔸   🔣𝕊   🔣𝔻   🔣𝔽   🔣𝔾   🔣ℍ   🔣𝕁   🔣𝕂   🔣𝕃   _    _    _  
-  @SB      🔣ℤ   🔣𝕏   🔣ℂ   🔣𝕍   🔣𝔹   🔣ℕ   🔣𝕄   _    _    _        @SB 
+  @SB      🔣ℤ   🔣𝕏   🔣ℂ   🔣𝕍   🔣𝔹   🔣ℕ   🔣𝕄   _    _    _        @SB   
   _      _    _             _               _    _    _    _  _    _    
 )
 (defalias SB (layer-while-held layout-mathbb-lower))
@@ -422,23 +407,24 @@
   _      _    _             _               _    _    _    _  _    _    
 )
 (deflayer layout-keyboard
-  _    🔣🔇  🔣🔉   🔣🔊  🔣⌨   🔣🔆  🔣🔅   _   _    _  _    _    _   🔣⎀  🔣⌦ 
-  _     _    _    _    _    _    _    _    _    _    _    _    _ 🔣⌫  
-  🔣↹     _    _    _    _    _    _    _    _    _    _    _    _ _ 
-  🔣⇪      _    _    _    _    _    _    _    _    _    _    _    🔣⏎ 
-  🔣⇧       _    _    _    _    _    _    _    _    _    _        🔣⇧  
-  🔣☸     🔣❖   🔣⌥            🔣␣              _    🔣☸   (macro 🔣⇤ 🔣←) (macro 🔣⇞ 🔣↑) (macro 🔣⇟ 🔣↓) (macro 🔣⇥ 🔣→)
+  _  🔣🔇 🔣🔉 🔣🔊 🔣⌨ 🔣🔆 🔣🔅 _  _   _  _   _  _   🔣⎀   🔣⌦  
+  _     _    _    _    _    _    _    _    _    _    _   _   _   🔣⌫   
+  🔣↹      _    _    _    _    _    _    _    _    _    _   _   _   _ 
+  🔣⇪     _    _    _    _    _    _    _    _    _    _   _    🔣⏎  
+  🔣⇧      _    _    _    _    _    _    _    _    _    _        🔣⇧   
+  🔣☸     🔣❖  🔣⌥             🔣␣               _   🔣☸
+  (macro 🔣⇤ 🔣←) (macro 🔣⇞ 🔣↑) (macro 🔣⇟ 🔣↓) (macro 🔣⇥ 🔣→)
 )
 ;; https://home.unicode.org/emoji/emoji-frequency/
  
  
 (deflayer layout-emoji
   _    _   _    _   _    _   _    _   _    _  _    _    _   _   _  
-  _     🔣😂   🔣😉   🔣😍   🔣🤣   🔣😊   🔣🙏   🔣💕   🔣😭   🔣😘   _    _    _ _   
-  _      🔣❤️   🔣👍   🔣😅   🔣👏   🔣😁   🔣♥️   🔣🔥   _    _    _    _    _ _ 
-  _       🔣💔   🔣💖   🔣💙   🔣😢   🔣🤔   🔣😆   🔣🙄   🔣💪   🔣☺️   _    _    _  
-  _        🔣👌   🔣🤗   _    _    _    _    _    _    _    _        _   
-  _      _    _             _               _    _    _    🔣👍 🔣👎   _    
+  _    🔣😂 🔣😉 🔣😍 🔣🤣 🔣😊 🔣🙏 🔣💕 🔣😭 🔣😘 _    _   _    _   
+  _     🔣❤️   🔣👍 🔣😅 🔣👏 🔣😁 🔣♥️ 🔣🔥 _    _    _    _   _   _ 
+  _       🔣💔 🔣💖 🔣💙 🔣😢 🔣🤔 🔣😆 🔣🙄 🔣💪 🔣☺️  _   _      _  
+  _        🔣👌 🔣🤗  _    _    _    _    _    _    _    _          _   
+  _        _    _             _               _    _    _   🔣👍 🔣👎 _    
 )
 ;; Pending: IPA and emoji layers
 
