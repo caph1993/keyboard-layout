@@ -136,14 +136,22 @@
 (defalias fn nop0)
 (deflayermap (hold-fn) 6 @fn6 j home o end - @fn- q @fnQ r @fnR e @fnE \ @fn\ l @fnL / @fn/ caps caps spc sldr c C-c x C-x z XX v XX)
 
+;; Dummy layer to show sldr icon in kanata-tray
+(defalias vkey-sldr (multi (on-press press-vkey vkey-sldr-on) (on-idle 1 tap-vkey vkey-sldr-off)))
+(defvirtualkeys vkey-sldr-on (layer-while-held sldr-empty-layer))
+(defvirtualkeys vkey-sldr-off (on-press release-vkey vkey-sldr-on))
+(deflayermap (sldr-empty-layer))
+
 (defalias fnE M-F3) ;; yakuake terminal
 (defalias fnR M-spc) ;; albert search
 (defalias fnQ lrld) ;; live reload kanata configuration
-(defalias fnL (macro sldr l a y o u t -)) ;; change kanata layout. Defined later
-(defalias fn\ (macro sldr \)) ;; tex
-(defalias fn/ (macro sldr /)) ;; ipa
-(defalias fn6 (macro sldr S-6)) ;; superscript
-(defalias fn- (macro sldr S--)) ;; subscript
+(defalias fnL (multi @vkey-sldr (macro sldr l a y o u t -))) ;; change kanata layout. Defined later
+(defalias fn\ (multi @vkey-sldr (macro sldr \))) ;; tex
+(defalias fn/ (multi @vkey-sldr (macro sldr /))) ;; ipa
+(defalias fn6 (multi @vkey-sldr (macro sldr S-6))) ;; superscript
+(defalias fn- (multi @vkey-sldr (macro sldr S--))) ;; subscript
+
+
 
 ;; esc releases all alternative layouts (declared later)
 (deftemplate def-sldr-layout (vk-name1 vk-name2 input-keys output-action)
