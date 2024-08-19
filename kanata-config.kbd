@@ -143,28 +143,35 @@
 (defalias tab2 (tap-hold-press 200 200 tab (macro⟳↑⤫ tab 200)))
 
 (defalias fn nop0)
-(deflayermap (hold-fn) 6 @fn6 j home o end - @fn- q @fnQ r @fnR e @fnE \ @fn\ l @fnL / @fn/ caps caps spc sldr c C-c x C-x z XX v XX)
+(deflayermap (hold-fn) 6 @fn6 - @fn- q @fnQ r @fnR e @fnE \ @fn\ l @fnL / @fn/ caps caps spc sldr c C-c x C-x z XX v XX)
 
 
 (defalias tab (tap-hold-press 180 180 tab (multi
   (layer-while-held arrows)
   (on-release release-vkey vkey-lalt)
+  (on-release release-vkey vkey-lctl)
 )))
 (defvirtualkeys vkey-lalt lalt)
+(defvirtualkeys vkey-lctl lctl)
 (defalias vEsc* (multi esc lrld))
-(defalias vTab* (fork
+(defalias aTab (fork
   (multi (on-press press-vkey vkey-lalt) alt tab)
-  tab (lctl)
+  esc (ctl)
+))
+(defalias cTab (fork
+  (multi (on-press press-vkey vkey-lctl) ctl tab)
+  esc (alt)
 ))
 
 (deflayer arrows
-  @vEsc* _   _    _   _    _   _    _   _    _   _   _    _   _   C-del
-  esc @vTab* lsft lctl @fn  XX lmet  XX   XX   XX  XX  @alck _ C-bspc   
+  @vEsc* XX XX   _   _    _   _    _   _    _   _   _    _   _   C-del
+  @cTab @aTab lsft lctl @fn  XX lmet  XX   XX   XX  XX  @alck _ C-bspc   
   lctl  C-q   C-w  C-e   C-r   C-t C-y  @bspc @↑   @→   @→→ _    _ @fn\ 
   _      C-a   C-s  C-d   C-f   C-g @←←  @←    @↓   @del XX   _    C-ret  
   _       C-z   C-x  C-c   C-v   C-b  XX  XX    @CS↓   XX   C-/     _   
-  _       _     _   (layer-while-held main)     lctl  _    _  _ _  _    
+  _       _     _ (multi lctl (layer-while-held main))   lctl  _    _  _ _  _    
 )
+
 
 
 ;; Dummy layer to show sldr icon in kanata-tray
@@ -216,7 +223,8 @@
   (on-press release-vkey vkey-mouse)
   (on-press tap-vkey vkey-arrows)
   (layer-while-held arrows)
-  (on-release tap-vkey vkey-arrows-mouse-off-unless-locked)
+  (on-release tap-vkey vkey-arrows-mouse-off)
+  ;; (on-release tap-vkey vkey-arrows-mouse-off-unless-locked)
 ))
 (deftemplate def-arrow-hold (key tap-out tap-if-quickly-followed-by)
   (defalias $key (tap-hold-press 200 200 (fork $tap-out @arrow-hold (nop2))
