@@ -59,13 +59,22 @@
 ;; scroll can be accessed by holding [ in mouse mode. tapping [ will not produce anything.
 ;; finally, arrows can be locked by taping - or p immediately after holding 3, = or [.
 
+;; (deflayer main
+;;   @esc _   _    _   _    _   _    _   _    _  _    _    _   _   @del 
+;;   @`    _    @2   @3   _    _    @6   _    _    _    _    _    @= @bspc 
+;;   @tab   _    _    _    _    _    _    _    _    _    _    @[   _ _ 
+;;   @caps   _    _    _    _    _    _    _    _    _    _    _    _  
+;;   _        _    _    _    _    _    _    _    _    _    _        _   
+;;   _      _    @lalt         _               _    _    @←   @↑ @↓   @→   
+;; )
+
 (deflayer main
-  @esc _   _    _   _    _   _    _   _    _  _    _    _   _   @del 
-  @`    _    @2   @3   _    _    @6   _    _    _    _    _    @= @bspc 
-  @tab   _    _    _    _    _    _    _    _    _    _    @[   _ _ 
-  @caps   _    _    _    _    _    _    _    _    _    _    _    _  
-  _        _    _    _    _    _    _    _    _    _    _        _   
-  _      _    @lalt         _               _    _    @←   @↑ @↓   @→   
+  @esc  f1  f2   f3  f4   f5  f6   f7  f8   f9 f10  f11  f12 ins @del
+  @`    1    2    3    4    5    6    7    8    9    0    -    = @bspc
+  @tab   q    w    e    r    t    y    u    i    o    p    @[   ] \ 
+  @caps   a    s    d    f    g    h    j    k    l    ;    '    ret
+  lsft     z    x    c    v    b    n    m    ,    .    /        rsft
+  lctl   lmet lalt          spc             ralt rctl @←   @↑ @↓   @→
 )
 ;; nop0 is "fn" button
 (defalias ← (fork left  home   (nop0)))
@@ -117,7 +126,7 @@
 (defalias ` (tap-hold-press 200 200 ` (multi nop0 (layer-while-held hold-1) (layer-while-held hold-fn))))
 ;; (defalias ` (tap-hold-press 200 200 ` (multi (layer-while-held arrows))))
 (defalias 3 (tap-hold-press 200 200 3 (multi (layer-while-held arrows))))
-(defalias tab (tap-hold-press 150 150 tab (multi lctl (layer-while-held hold-1))))
+;; (defalias tab (tap-hold-press 150 150 tab (multi lctl (layer-while-held hold-1))))
 (defalias tab200 (tap-hold-press 200 200 tab (multi lctl (layer-while-held hold-1))))
 (defalias 2 (tap-hold-press 200 200 2 (multi lsft (layer-while-held hold-1))))
 ;; (defalias 3 (tap-hold-press 200 200 3 (multi nop0 (layer-while-held hold-1) (layer-while-held hold-fn))))
@@ -135,6 +144,28 @@
 
 (defalias fn nop0)
 (deflayermap (hold-fn) 6 @fn6 j home o end - @fn- q @fnQ r @fnR e @fnE \ @fn\ l @fnL / @fn/ caps caps spc sldr c C-c x C-x z XX v XX)
+
+
+(defalias tab (tap-hold-press 180 180 tab (multi
+  (layer-while-held arrows)
+  (on-release release-vkey vkey-lalt)
+)))
+(defvirtualkeys vkey-lalt lalt)
+(defalias vEsc* (multi esc lrld))
+(defalias vTab* (fork
+  (multi (on-press press-vkey vkey-lalt) alt tab)
+  tab (lctl)
+))
+
+(deflayer arrows
+  @vEsc* _   _    _   _    _   _    _   _    _   _   _    _   _   C-del
+  esc @vTab* lsft lctl @fn  XX lmet  XX   XX   XX  XX  @alck _ C-bspc   
+  lctl  C-q   C-w  C-e   C-r   C-t C-y  @bspc @↑   @→   @→→ _    _ @fn\ 
+  _      C-a   C-s  C-d   C-f   C-g @←←  @←    @↓   @del XX   _    C-ret  
+  _       C-z   C-x  C-c   C-v   C-b  XX  XX    @CS↓   XX   C-/     _   
+  _       _     _   (layer-while-held main)     lctl  _    _  _ _  _    
+)
+
 
 ;; Dummy layer to show sldr icon in kanata-tray
 (defalias vkey-sldr (multi (on-press press-vkey vkey-sldr-on) (on-idle 1 tap-vkey vkey-sldr-off)))
@@ -227,14 +258,15 @@
 ))
 (defvirtualkeys vkey-arrows-mouse-off-unless-locked (fork (on-press tap-vkey vkey-arrows-mouse-off) XX (nop2)))
 ;; (defalias arrows-mouse-off (on-press tap-vkey vkey-arrows-mouse-off))
-(deflayer arrows
-  @esc2 _   _    _   _    _   _    _   _    _   _   _    _   _    _  
-  _     _   lsft  _    tab  esc  XX    _    ret  XX   @del @alck _ _   
-  _      C-q C-w  C-e  C-r  C-t  C-y   @bspc @↑   @→   @→→  _  _ @fn\ 
-  _       C-a C-s  C-d  C-f  C-g   @←←  @←    @↓   XX   XX   _     _  
-  _        C-z C-x  C-c  C-v  C-b   XX   XX    @CS↓   XX   C-/     _   
-  _      _    _             lsft                lctl  _    _  _ _  _    
-)
+;; (deflayer arrows
+;;   @esc2 _   _    _   _    _   _    _   _    _   _   _    _   _    _  
+;;   _     _   lsft  _    tab  esc  XX    _    ret  XX   @del @alck _ _   
+;;   _      C-q C-w  C-e  C-r  C-t  C-y   @bspc @↑   @→   @→→  _  _ @fn\ 
+;;   _       C-a C-s  C-d  C-f  C-g   @←←  @←    @↓   XX   XX   _     _  
+;;   _        C-z C-x  C-c  C-v  C-b   XX   XX    @CS↓   XX   C-/     _   
+;;   _      _    _             lsft                lctl  _    _  _ _  _    
+;; )
+
 
 ;; (defalias alck (on-press press-vkey vkey-arrows-lock))
 ;; (defalias alck (fork (on-press press-vkey vkey-arrows-lock) (on-press tap-vkey vkey-arrows-mouse-off) (nop2)))
