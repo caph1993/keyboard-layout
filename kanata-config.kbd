@@ -70,14 +70,15 @@
 
 (deflayer main
   @esc  f1  f2   f3  f4   f5  f6   f7  f8   f9 f10  f11  f12 ins @del
-  `     1    2    3    4    5    6    7    8    9    0    -    = @bspc
+  @grv  1    2    3    4    5    6    7    8    9    0    -    = @bspc
   @tab   q    w    e    r    t    y    u    i    o    p    @[   ] \ 
   caps    a    s    d    f    g    h    j    k    l    ;    '    ret
   lsft     z    x    c    v    b    n    m    ,    .    /        rsft
-  lctl   lmet lalt          spc             ralt rctl @←   @↑ @↓   @→
+  lctl   lmet lalt          spc             ralt  rctl @←  @↑ @↓   @→
 )
 
 ;; nop0 is the "go to extreme" button <=>
+;; nop3 is a "ctl" button. All ctl buttons trigger nop3, except the tab key for which certain keys are unmoded. 
 ;; Repeated arrow means C-arrow (word jump). Only defined for left and right.
 (defalias <=> nop0)
 (defalias ← (fork left  home   (nop0)))
@@ -107,28 +108,34 @@
   XX     XX   XX            XX              XX   XX   XX   XX XX   XX   
 )
 
-(defalias tab (tap-hold-press 180 180 tab (multi
+(defalias grv (tap-hold-press 180 180 ` lsft))
+(defalias tab (tap-hold-press 180 180 tab (multi 
+  lctl
   (layer-while-held arrows)
   (on-release release-vkey vkey-lalt)
   (on-release release-vkey vkey-lctl)
 )))
-(defvirtualkeys vkey-lalt lalt)
-(defvirtualkeys vkey-lctl lctl)
+(defvirtualkeys vkey-lalt (multi lalt))
+(defvirtualkeys vkey-lctl (multi lctl nop3))
 (defalias esc* (multi esc lrld))
-(defalias aTab (fork (multi (on-press press-vkey vkey-lalt) alt tab) esc (ctl)))
-(defalias cTab (fork (multi (on-press press-vkey vkey-lctl) ctl tab) esc (alt)))
+(defalias aTab (fork (multi (on-press press-vkey vkey-lalt) alt (unmod (lctl) tab)) (multi esc (on-press release-vkey vkey-lctl)) (nop3)))
+(defalias tabEsc (fork (multi (on-press press-vkey vkey-lctl) ctl tab) (multi esc (on-press release-vkey vkey-lalt)) (lalt)))
 
 (deflayer arrows
-  @esc* XX  @aTab @cTab XX XX XX   XX   XX   XX   XX   XX   XX  XX  C-del
-  XX    @fn  lsft  lctl @<=> lalt  lmet  XX   lctl XX   lsft @alck XX C-bspc
+  @esc* XX  @aTab @tabEsc XX XX XX   XX   XX   XX   XX   XX   XX  XX  _
+  _      @fn  lsft  lctl @<=> lalt  lmet  XX   lctl S-9   S-0 XX   XX _
   _       C-q  C-w   C-e  C-r  C-t   C-y  @bspc @↑   @→   @→→  _   XX  @fn\
-  @alck     C-a  C-s   C-d   C-f  C-g  @←←  @←    @↓   XX   XX   XX  C-ret
-  _           C-z  C-x   C-c   C-v  C-b  @del ret   @CS↓ XX  C-/      _
-  _            _    _               _               lctl  _   _  _  _  _
+  caps      C-a  C-s   C-d   C-f  C-g  @←←  @←    @↓  @del  XX   XX  _
+  _           C-z  C-x   C-c   C-v  C-b ret  esc   @CS↓ XX   _      _
+  _            _    _               _               @alck  _   _  _  _  _
 )
 
-(defalias fn (layer-while-held hold-fn))
-(deflayermap (hold-fn) 6 @fn6 - @fn- q @fnQ r @fnR e @fnE \ @fn\ l @fnL / @fn/ caps caps spc sldr c C-c x C-x z XX v XX)
+(defalias fn (multi
+  (layer-while-held hold-fn) 
+  (on-release release-vkey vkey-lalt)
+  (on-release release-vkey vkey-lctl)
+))
+(deflayermap (hold-fn) 2 @aTab 3 C-tab 6 @fn6 - @fn- q @fnQ r @fnR e @fnE \ @fn\ l @fnL / @fn/ caps caps spc sldr c C-c x C-x z XX v XX)
 
 
 ;; (defalias - (fork XX - (lsft ctl alt)))
