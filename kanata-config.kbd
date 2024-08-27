@@ -1,4 +1,3 @@
-
 (defcfg
   danger-enable-cmd yes
   movemouse-inherit-accel-state yes
@@ -69,29 +68,17 @@
 ;; )
 
 (deflayer main
-  @esc  f1  f2   f3  f4   f5  f6   f7  f8   f9 f10  f11  f12 ins @del
-  `     1    2    3    4    5    6    7    8    9    0    -    = @bspc
+  @esc  f1  f2   f3  f4   f5  f6   f7  f8   f9 f10  f11  f12 ins del
+  `     1    2    3    4    5    6    7    8    9    0    -    = bspc
   @tab   q    w    e    r    t    y    u    i    o    p    [    ] @\ 
-  @mse\   a    s    d    f    g    h    j    k    l    ;    '    ret
+  @mse   a    s    d    f    g    h    j    k    l    ;    '    ret
   lsft     z    x    c    v    b    n    m    ,    .    /        rsft
   lctl   lmet lalt          spc             ralt  rctl @←  @↑ @↓   @→
 )
 
-;; nop0 is the "go to extreme" button <=>
-;; nop3 is a "ctl" button. All ctl buttons trigger nop3, except the tab key for which certain keys are unmoded. 
-;; Repeated arrow means C-arrow (word jump). Only defined for left and right.
-(defalias <=> nop0)
-(defalias ← (fork left  home   (nop0)))
-(defalias ↑ (fork up    pgup   (nop0)))
-(defalias ↓ (fork down  pgdn   (nop0)))
-(defalias → (fork right end    (nop0)))
-(defalias ←← (fork C-left (unmod (lctl rctl) home) (lctl rctl ctl nop0)))
-(defalias →→ (fork C-right (unmod (lctl rctl) end) (lctl rctl ctl nop0)))
-(defalias bspc (fork bspc (macro S-home (unmod bspc)) (nop0)))
-(defalias del  (fork del  (macro S-end  (unmod del) ) (nop0)))
-(defalias esc  (multi esc (on-press release-vkey vkey-layouts)))
 
-(deflayer empty-for-reference
+;; Reference layers for copy-paste
+(deflayer empty
   _    _   _    _   _    _   _    _   _    _  _    _    _   _   _  
   _     _    _    _    _    _    _    _    _    _    _    _    _ _   
   _      _    _    _    _    _    _    _    _    _    _    _    _ _ 
@@ -107,97 +94,130 @@
   XX       XX   XX   XX   XX   XX   XX   XX   XX   XX   XX       XX  
   XX     XX   XX            XX              XX   XX   XX   XX XX   XX   
 )
+;; Tip. Use: (multi (layer-while-held disabled) (layer-while-held some-layer)) to block all keys but those defined in some-layer
 
-(defalias theTab (multi 
-  lctl
-  (layer-while-held tab-layer)
-  (on-release release-vkey vkey-lalt)
-  (on-release release-vkey vkey-lctl)
-))
-(defalias tab (tap-hold-press 180 180 tab @theTab))
-(defalias arrows\ (multi 
-  (layer-while-held arrows\)
-  (on-release release-vkey vkey-lalt)
-  (on-release release-vkey vkey-lctl)
-))
-(defalias \ (tap-hold-press 180 180 \ @arrows\))
 
-(defvirtualkeys vkey-lalt (multi lalt))
-(defvirtualkeys vkey-lctl (multi lctl nop3)) ;; needed to distinguish tab's ctl from this ctl
-(defalias esc* (multi esc lrld))
-(defalias aTab (fork (multi (on-press press-vkey vkey-lalt) alt (unmod (lctl) tab)) (multi esc (on-press release-vkey vkey-lctl)) (nop3)))
-(defalias cTab (fork (multi (on-press press-vkey vkey-lctl) ctl               tab ) (multi esc (on-press release-vkey vkey-lalt)) (lalt)))
+;; ----------------------------------------------------------
+;; Mouse layer
+;; ----------------------------------------------------------
 
-(defalias [[ (fork (multi lsft (unmod (ctl) 9))  (fork [ { (sft))   (nop0)))
-(defalias ]] (fork (multi lsft (unmod (ctl) 0))  (fork ] } (sft))   (nop0)))
-
-(deflayer tab-layer
-  @esc* XX   XX  XX   XX   XX  XX   XX   XX   XX   XX   XX   lrld  XX  _
-  S-tab  tab  lsft lctl @<=> lalt  lmet @fnL XX   XX    @<=> lctl lsft  _
-  _      _    _    _    _    _    _    _    _    _    _    _    _  _ 
-  _       _    _    _    _    _    _    _    _    _    _    _     _  
-  _        _    _    _    _    _    _    _    _    _    _         _   
-  _      _    _             _               _    _    _    _  _    _  
+(deftemplate  def-accel (key-name actual-key delay-1 delay-2 delay-3 delay-4 delay-*)
+  (defvirtualkeys $key-name (macro⟳↑⤫ ($actual-key 1 $delay-*) 25))
+  (defalias $key-name
+    (multi
+      (macro-release-cancel
+        ($actual-key 1 $delay-1) 25 ($actual-key 1 $delay-1) 25 ($actual-key 1 $delay-1) 25
+        ($actual-key 1 $delay-1) 25 ($actual-key 1 $delay-1) 25 ($actual-key 1 $delay-1) 25
+        ($actual-key 1 $delay-1) 25 ($actual-key 1 $delay-1) 25 ($actual-key 1 $delay-1) 25
+        ($actual-key 1 $delay-2) 25 ($actual-key 1 $delay-2) 25 ($actual-key 1 $delay-2) 25
+        ($actual-key 1 $delay-2) 25 ($actual-key 1 $delay-2) 25 ($actual-key 1 $delay-2) 25
+        ($actual-key 1 $delay-2) 25 ($actual-key 1 $delay-2) 25 ($actual-key 1 $delay-2) 25
+        ($actual-key 1 $delay-3) 25 ($actual-key 1 $delay-3) 25 ($actual-key 1 $delay-3) 25
+        ($actual-key 1 $delay-3) 25 ($actual-key 1 $delay-3) 25 ($actual-key 1 $delay-3) 25
+        ($actual-key 1 $delay-3) 25 ($actual-key 1 $delay-3) 25 ($actual-key 1 $delay-3) 25
+        ($actual-key 1 $delay-4) 25 ($actual-key 1 $delay-4) 25 ($actual-key 1 $delay-4) 25
+        ($actual-key 1 $delay-4) 25 ($actual-key 1 $delay-4) 25 ($actual-key 1 $delay-4) 25
+        ($actual-key 1 $delay-4) 25 ($actual-key 1 $delay-4) 25 ($actual-key 1 $delay-4) 25
+        (on-press press-vkey $key-name) ;; this repeats delay-* forever
+      )
+      (on-release release-vkey  $key-name)
+    )
+  )
 )
-
-(deflayer arrows\
-  @esc* XX   XX  XX   XX   XX  XX   XX   XX   XX   XX   XX   lrld  XX  _
-  S-tab  tab  lsft lctl @<=> lalt  lmet @fnL XX   XX    @<=> lctl lsft  _
-  _       C-q  C-w  C-e  C-r  C-t   C-y  XX   XX   @bspc @↑   @→   @→→  _
-  _        C-a  C-s  C-d   C-f  C-g  C-h  XX   @←←  @←    @↓  @del      _
-  _         C-z  C-x  C-c   C-v  C-b  C-n  XX   ret  esc   @fn\         _
-  _            _    _               _             lalt  _   _  _  _  _
+;; Mouse movements (normal and slow)
+(defalias
+  🖱↑   (🖱accel↑ 5 300 1 10)
+  🖱→   (🖱accel→ 5 300 1 10)
+  🖱←   (🖱accel← 5 300 1 10)
+  🖱↓   (🖱accel↓ 5 300 1 10)
+  s🖱↑  (🖱accel↑ 25 300 1 10)
+  s🖱→  (🖱accel→ 25 300 1 10)
+  s🖱←  (🖱accel← 25 300 1 10)
+  s🖱↓  (🖱accel↓ 25 300 1 10)
 )
+;; Scrollwheel movements (normal and slow)
+(template-expand def-accel  ☸↑   🖱☸↑   25 50 100 150 250)
+(template-expand def-accel  ☸→   🖱☸→   25 50 100 150 250)
+(template-expand def-accel  ☸←   🖱☸←   25 50 100 150 250)
+(template-expand def-accel  ☸↓   🖱☸↓   25 50 100 150 250)
+(template-expand def-accel  s☸↑  🖱☸↑   5 10 20 30 50)
+(template-expand def-accel  s☸→  🖱☸→   5 10 20 30 50)
+(template-expand def-accel  s☸←  🖱☸←   5 10 20 30 50)
+(template-expand def-accel  s☸↓  🖱☸↓   5 10 20 30 50)
 
-(defalias mse\ (multi (layer-while-held arrows\) (layer-while-held mouse\)))
-(deflayermap (mouse\)
-  p  (🖱accel↑ 5 300 1 10)
-  [  (🖱accel→ 5 300 1 10)
-  l  (🖱accel← 5 300 1 10)
-  ;  (🖱accel↓ 5 300 1 10)
+
+(defalias mse (multi (layer-while-held shift-numbers) (layer-while-held mouse)))
+(deflayermap (shift-numbers)
+  ` S-`  1 S-1  2 S-2  3 S-3  4 S-4  5 S-5  6 S-6  7 S-7  8 S-8  9 S-9  0 S-0  - S--  = S-=
+)
+(deflayermap (mouse)
+  p @🖱↑ [ @🖱→ l @🖱← ; @🖱↓
   , ‹🖰
   . 🖰›
   i 🖰3
-  ralt (layer-while-held mouse\-slow)
-  spc (layer-while-held scroll\)
+  ralt (layer-while-held mouse-slow)
+  spc (layer-while-held scroll)
 )
-(deflayermap (mouse\-slow)
-  p @🖱s↑ [ @🖱s→ l @🖱s← ; @🖱s↓
+(deflayermap (mouse-slow)
+  p @s🖱↑ [ @s🖱→ l @s🖱← ; @s🖱↓
 )
-(deflayermap (scroll\)
+(deflayermap (scroll)
   p @☸↑ [ @☸→ l @☸← ; @☸↓
-  spc (layer-while-held scroll\-slow)
+  spc (layer-while-held scroll-slow)
 )
-(deflayermap (scroll\-slow)
-  p @☸s↑ [ @☸s→ l @☸s← ; @☸s↓  
+(deflayermap (scroll-slow)
+  p @s☸↑ [ @s☸→ l @s☸← ; @s☸↓  
 )
 
 
 
+;; ----------------------------------------------------------
+;; Tab and arrows layer
+;; ----------------------------------------------------------
+
+(defalias theTab (multi lctl (layer-while-held left-modifiers) (layer-while-held actions-F1-to-F12)))
+(defalias tab (tap-hold-press 180 180 tab @theTab))
+
+(defalias arrows (layer-while-held arrows))
+(defalias \ (tap-hold-press 180 180 \ @arrows))
+
+(deflayermap (left-modifiers)  ` S-tab  1  tab   2 lsft   3 lctl  4 @<=>)
+(deflayermap (actions-F1-to-F12)
+  f1 (unmod 🔇)  f2 (unmod 🔉)  f3 (unmod 🔊)  f5 (unmod ⌨💡+)  f6 (unmod 🔅)  f7 (unmod 🔆)
+  f9 (on-press press-vkey vkey-layouts)
+  f12 lrld
+)
+
+(deflayer arrows
+  @esc   _   _    _   _    _   _    _   _    _  _    _    _   _       @del  
+  _     _     lsft lctl  @<=> _    _    _    _    _    _    _    lsft @bspc 
+  _       C-q  C-w  C-e  C-r  C-t   C-y  XX   XX   @bspc @↑   @→   @→→  _
+  _        C-a  C-s  C-d   C-f  C-g  C-h  XX   @←←  @←    @↓  @del      _
+  _         C-z  C-x  C-c   C-v  C-b  C-n  XX   ret  esc   @fn\         _
+  _            _    _               _             @<=>  _   _  _  _  _
+)
+
+;; nop0 is the "go to extreme" button <=>
+;; nop3 is a "ctl" button. All ctl buttons trigger nop3, except the tab key for which certain keys are unmoded. 
+;; Repeated arrow means ctrl+arrow (word jump). Only defined for left and right.
+(defalias <=>  (multi nop0 (layer-while-held arrows) (layer-while-held pure-F1-to-F12)))
+(deflayermap (pure-F1-to-F12)
+  f1 f1  f2 f2  f3 f3  f4 f4  f5 f5  f6 f6  f7 f7  f8 f8  f9 f9  f10 f10  f11 f11  f12 f12
+)
+(defalias ←    (fork left  home   (nop0)))
+(defalias ↑    (fork up    pgup   (nop0)))
+(defalias ↓    (fork down  pgdn   (nop0)))
+(defalias →    (fork right end    (nop0)))
+(defalias ←←   (fork C-left (unmod (lctl rctl) home) (lctl rctl ctl nop0)))
+(defalias →→   (fork C-right (unmod (lctl rctl) end) (lctl rctl ctl nop0)))
+(defalias bspc (fork bspc (macro S-home (unmod bspc)) (nop0)))
+(defalias del  (fork del  (macro S-end  (unmod del) ) (nop0)))
+(defalias esc  (multi esc (on-press release-vkey vkey-layouts) ))
 
 
-
-
-;; (deflayer arrows
-;;   @esc* XX  @aTab @cTab XX XX XX   XX   XX   XX   XX   XX   lrld  XX  _
-;;   _      @fn  lsft  lctl @<=> lalt  lmet  XX   lctl @[[ @]]   _   _   _
-;;   _       C-q  C-w   C-e  C-r  C-t   C-y  @bspc @↑   @→   @→→  _   XX  @fn\
-;;   _        C-a  C-s   C-d   C-f  C-g  @←←  @←    @↓  @del  XX   XX  _
-;;   _           C-z  C-x   C-c   C-v  C-b ret  esc   @CS↓ XX   _      _
-;;   _            _    _               _               _  _   _  _  _  _
-;; )
-
-;; (defalias fn (multi
-;;   (layer-while-held hold-fn) 
-;;   (on-release release-vkey vkey-lalt)
-;;   (on-release release-vkey vkey-lctl)
-;; ))
-;; (deflayermap (hold-fn) 2 @aTab 3 C-tab 6 @fn6 - @fn- q @fnQ r @fnR e @fnE \ @fn\ l @fnL / @fn/ caps caps spc sldr c C-c x C-x z XX v XX)
-
-
-;; (defalias - (fork XX - (lsft ctl alt)))
-;; (defalias = (fork XX = (lsft ctl alt)))
-;; ⌫ ⌦
+;; ----------------------------------------------------------
+;; Custom layouts and sldr commands (mostly TeX)
+;; ----------------------------------------------------------
 
 ;; Dummy layer to show sldr icon in kanata-tray
 (defalias vkey-sldr (multi (on-press press-vkey vkey-sldr-on) (on-idle 1 tap-vkey vkey-sldr-off)))
@@ -205,197 +225,11 @@
 (defvirtualkeys vkey-sldr-off (on-press release-vkey vkey-sldr-on))
 (deflayermap (sldr-empty-layer))
 
-;; (defalias fnE M-F3) ;; yakuake terminal
-;; (defalias fnR M-spc) ;; albert search
-;; (defalias fnQ lrld) ;; live reload kanata configuration
-;; (defalias fnL (multi @vkey-sldr (macro sldr l a y o u t -))) ;; change kanata layout. Defined later
 (defalias fn\ (multi @vkey-sldr (macro sldr \))) ;; tex
-(defalias fnL (on-press press-vkey vkey-layouts))
-(defalias fnLL (on-press release-vkey vkey-layouts))
+(defalias kbd (on-press press-vkey vkey-layouts))
+(defalias esc-kbd (on-press release-vkey vkey-layouts))
 (defvirtualkeys vkey-layouts (layer-while-held layout-IPA))
 
-;; (defalias fn/ (multi @vkey-sldr (macro sldr /))) ;; ipa
-;; (defalias fn6 (multi @vkey-sldr (macro sldr S-6))) ;; superscript
-;; (defalias fn- (multi @vkey-sldr (macro sldr S--))) ;; subscript
-
-
-;; layout switcher
-
-
-;; esc releases all alternative layouts (declared later)
-(deftemplate def-sldr-layout (vk-name1 vk-name2 input-keys output-action)
-  (defvirtualkeys $vk-name1 $output-action)
-  (defvirtualkeys $vk-name2 (on-press press-vkey $vk-name1))
-  (defseq $vk-name2 $input-keys)
-)
-(template-expand def-sldr-layout layout-g layout--g  (l a y o u t - g  ) (layer-while-held layout-greek)       )
-(template-expand def-sldr-layout layout-c layout--c  (l a y o u t - c  ) (layer-while-held layout-mathcal)     )
-(template-expand def-sldr-layout layout-b layout--b  (l a y o u t - b  ) (layer-while-held layout-mathbb)      )
-(template-expand def-sldr-layout layout-^ layout--^  (l a y o u t - S-6) (layer-while-held layout-superscript) )
-(template-expand def-sldr-layout layout-_ layout--_  (l a y o u t - S--) (layer-while-held layout-subscript)   )
-(template-expand def-sldr-layout layout-k layout--k  (l a y o u t - k  ) (layer-while-held layout-keyboard)   )
-(template-expand def-sldr-layout layout-e layout--e  (l a y o u t - e  ) (layer-while-held layout-emoji)   )
-(defvirtualkeys vkey-layouts-release (macro
-  ;; release all declared layouts and come to default
-  (on-press release-vkey layout-g)
-  (on-press release-vkey layout-c)
-  (on-press release-vkey layout-b)
-  (on-press release-vkey layout-^)
-  (on-press release-vkey layout-_)
-  (on-press release-vkey layout-e)
-  (on-press release-vkey layout-k)
-))
-
-
-;; ---------------------------------------------
-
-;; (defalias arrow-hold (multi
-;;   (on-press release-vkey vkey-lock)
-;;   (on-press release-vkey vkey-mouse)
-;;   (on-press tap-vkey vkey-arrows)
-;;   (layer-while-held arrows)
-;;   (on-release tap-vkey vkey-arrows-mouse-off)
-;;   ;; (on-release tap-vkey vkey-arrows-mouse-off-unless-locked)
-;; ))
-;; (deftemplate def-arrow-hold (key tap-out tap-if-quickly-followed-by)
-;;   (defalias $key (tap-hold-press 200 200 (fork $tap-out @arrow-hold (nop2))
-;;   (tap-hold-except-keys 1 1 $tap-out @arrow-hold $tap-if-quickly-followed-by)))
-;; )
-;; ;; (template-expand def-arrow-hold =  = (spc))
-;; (template-expand def-arrow-hold [   [ (]))
-;; (template-expand def-arrow-hold grv ` ( ))
-;; ;; (defalias grv (tap-hold-press 180 180 ` lsft))
-;; (defalias caps (tap-dance-eager 200 (
-;;   (tap-hold 200 200
-;;     ;; single tap
-;;     (on-press tap-vkey vkey-arrows-mouse-off)
-;;     ;; hold
-;;     (multi (layer-while-held mouse) (on-release tap-vkey vkey-arrows-mouse-off-unless-locked))
-;;   )
-;;   ;; ;; double tap (after executing first tap)
-;;   (tap-hold 200 200
-;;     ;; single tap
-;;     (macro (on-press press-vkey vkey-arrows) (on-press release-vkey vkey-mouse))
-;;     ;; hold
-;;     (multi (layer-while-held arrows) (on-release tap-vkey vkey-arrows-mouse-off))
-;;   )
-;;   ;; ;; triple tap (after executing first and second tap)
-;;   (macro (on-press press-vkey vkey-arrows-mouse-off) lrld)
-;; )))
-
-;; ;; nop1 is pressed along with arrows or mouse layers
-;; (defvirtualkeys vkey-arrows (multi nop1 (layer-while-held arrows)))
-;; (defvirtualkeys vkey-mouse (multi nop1 (layer-while-held mouse)))
-
-;; ;; nop2 is pressed if the layers are locked with a special locking key
-;; (defvirtualkeys vkey-lock nop2)
-;; (defvirtualkeys vkey-mouse-lock (multi nop2 (on-press press-vkey vkey-mouse)))
-
-;; (defvirtualkeys vkey-arrows-mouse-off (multi
-;;   (on-press release-vkey vkey-arrows)
-;;   (on-press release-vkey vkey-mouse)
-;;   (on-press release-vkey vkey-lock)
-;;   (on-press release-vkey vkey-mouse-lock)
-;; ))
-;; (defvirtualkeys vkey-arrows-mouse-off-unless-locked (fork (on-press tap-vkey vkey-arrows-mouse-off) XX (nop2)))
-;; ;; (defalias arrows-mouse-off (on-press tap-vkey vkey-arrows-mouse-off))
-;; ;; (deflayer arrows
-;; ;;   @esc2 _   _    _   _    _   _    _   _    _   _   _    _   _    _  
-;; ;;   _     _   lsft  _    tab  esc  XX    _    ret  XX   @del @alck _ _   
-;; ;;   _      C-q C-w  C-e  C-r  C-t  C-y   @bspc @↑   @→   @→→  _  _ @fn\ 
-;; ;;   _       C-a C-s  C-d  C-f  C-g   @←←  @←    @↓   XX   XX   _     _  
-;; ;;   _        C-z C-x  C-c  C-v  C-b   XX   XX    @CS↓   XX   C-/     _   
-;; ;;   _      _    _             lsft                lctl  _    _  _ _  _    
-;; ;; )
-
-
-;; ;; (defalias alck (on-press press-vkey vkey-arrows-lock))
-;; ;; (defalias alck (fork (on-press press-vkey vkey-arrows-lock) (on-press tap-vkey vkey-arrows-mouse-off) (nop2)))
-;; (defalias alck (tap-dance-eager 200 (
-;;   (macro (on-press press-vkey vkey-lock) (on-press press-vkey vkey-mouse) (on-press release-vkey vkey-arrows) )
-;;   (macro (on-press press-vkey vkey-lock) (on-press press-vkey vkey-arrows) (on-press release-vkey vkey-mouse) )
-;;   (macro (on-press release-vkey vkey-lock) (on-press release-vkey vkey-mouse) (on-press release-vkey vkey-arrows) )
-;; )))
-;; ;; (defalias aulck (multi
-;; ;;   (on-press release-vkey vkey-lock)
-;; ;;   (on-press release-vkey vkey-mouse)
-;; ;;   (layer-while-held arrows)
-;; ;;   (on-release tap-vkey vkey-arrows-mouse-off-unless-locked))
-;; ;; )
-
-(defalias CS↓ C-S-down)
-(defalias esc2 (multi esc lrld))
-(deflayer mouse
-  _    _   _    _   _    _   _    _   _    _  _    _    _   _   _  
-  _     _    _    _    _    _    🖰3   _   XX   XX   _    _  _ _   
-  _      _    _    _    _    _    XX   XX   @🖱↑  @🖱→  XX   _ _ _ 
-  _       _    _    _    _    _    XX   @🖱←  @🖱↓  XX   _    _    _  
-  _        _    _    _    _    XX   ‹🖰   🖰›   XX   _    _        _   
-  _      _    _  (layer-while-held scroll) @mse-slow _    _    _  _    _    
-)
-(defalias
-  🖱↑  (🖱accel↑ 5 300 1 10)
-  🖱→  (🖱accel→ 5 300 1 10)
-  🖱←  (🖱accel← 5 300 1 10)
-  🖱↓  (🖱accel↓ 5 300 1 10)
-)
-(defalias mse-slow (layer-while-held mouse-slow))
-(deflayermap (mouse-slow) i @🖱s↑ o @🖱s→ j @🖱s← k @🖱s↓)
-(defalias
-  🖱s↑  (🖱accel↑ 25 300 1 10)
-  🖱s→  (🖱accel→ 25 300 1 10)
-  🖱s←  (🖱accel← 25 300 1 10)
-  🖱s↓  (🖱accel↓ 25 300 1 10)
-)
-(defalias scroll-slow (layer-while-held scroll-slow))
-
-
-(deftemplate  accel-scroll (key-name actual-key)
-  (defvirtualkeys $key-name (macro⟳↑⤫ ($actual-key 1 250) 25))
-  (defalias $key-name
-    (multi
-      (macro-release-cancel
-        ($actual-key 1 25) 25 ($actual-key 1 25) 25 ($actual-key 1 25) 25 ($actual-key 1 25) 25 ($actual-key 1 25) 25 ($actual-key 1 25) 25 ($actual-key 1 25) 25 ($actual-key 1 25) 25 ($actual-key 1 25) 25 ($actual-key 1 25) 25 ($actual-key 1 25) 25 ($actual-key 1 50) 25 ($actual-key 1 50) 25 ($actual-key 1 50) 25 ($actual-key 1 50) 25 ($actual-key 1 50) 25 ($actual-key 1 50) 25 ($actual-key 1 50) 25 ($actual-key 1 50) 25 ($actual-key 1 50) 25 ($actual-key 1 100) 25 ($actual-key 1 100) 25 ($actual-key 1 100) 25 ($actual-key 1 100) 25 ($actual-key 1 100) 25 ($actual-key 1 100) 25 ($actual-key 1 100) 25 ($actual-key 1 100) 25 ($actual-key 1 150) 25 ($actual-key 1 150) 25 ($actual-key 1 150) 25 ($actual-key 1 250) 25 ($actual-key 1 250) 25 ($actual-key 1 250) 25 ($actual-key 1 250) 25 ($actual-key 1 250) 25 ($actual-key 1 250) 25 (on-press press-vkey $key-name)
-      )
-      (on-release release-vkey  $key-name)
-    )
-  )
-)
-(template-expand accel-scroll ☸↑ 🖱☸↑)
-(template-expand accel-scroll ☸→ 🖱☸→)
-(template-expand accel-scroll ☸← 🖱☸←)
-(template-expand accel-scroll ☸↓ 🖱☸↓)
-(deflayer scroll
-  _    _   _    _   _    _   _    _   _    _  _    _    _   _   _  
-  _     _    _    _    _    _    _    _    _    _    _    _    _ _   
-  _      _    _    _    _    _    _    _    @☸↑  @☸→  _    _    _ _ 
-  _       _    _    _    _    _    _    @☸←  @☸↓  _    _    _    _  
-  _        _    _    _    _    _    _    _    _    _    _        _   
-  _      _    _             _          @scroll-slow  _    _    _  _    _    
-)
-(deftemplate  accel-scroll-slow (key-name actual-key)
-  (defvirtualkeys $key-name (macro⟳↑⤫ ($actual-key 1 50) 25))
-  (defalias $key-name
-    (multi
-      (macro-release-cancel
-        ($actual-key 1 5) 25 ($actual-key 1 5) 25 ($actual-key 1 5) 25 ($actual-key 1 5) 25 ($actual-key 1 5) 25 ($actual-key 1 5) 25 ($actual-key 1 5) 25 ($actual-key 1 5) 25 ($actual-key 1 5) 25 ($actual-key 1 5) 25 ($actual-key 1 5) 25 ($actual-key 1 10) 25 ($actual-key 1 10) 25 ($actual-key 1 10) 25 ($actual-key 1 10) 25 ($actual-key 1 10) 25 ($actual-key 1 10) 25 ($actual-key 1 10) 25 ($actual-key 1 10) 25 ($actual-key 1 10) 25 ($actual-key 1 20) 25 ($actual-key 1 20) 25 ($actual-key 1 20) 25 ($actual-key 1 20) 25 ($actual-key 1 20) 25 ($actual-key 1 20) 25 ($actual-key 1 20) 25 ($actual-key 1 20) 25 ($actual-key 1 30) 25 ($actual-key 1 30) 25 ($actual-key 1 30) 25 ($actual-key 1 50) 25 ($actual-key 1 50) 25 ($actual-key 1 50) 25 ($actual-key 1 50) 25 ($actual-key 1 50) 25 ($actual-key 1 50) 25 (on-press press-vkey $key-name)
-      )
-      (on-release release-vkey  $key-name)
-    )
-  )
-)
-(template-expand accel-scroll-slow ☸s↑ 🖱☸↑)
-(template-expand accel-scroll-slow ☸s→ 🖱☸→)
-(template-expand accel-scroll-slow ☸s← 🖱☸←)
-(template-expand accel-scroll-slow ☸s↓ 🖱☸↓)
-(deflayer scroll-slow
-  _    _   _    _   _    _   _    _   _    _  _    _    _   _   _  
-  _     _    _    _    _    _    _    _    _    _    _    _    _ _   
-  _      _    _    _    _    _    _    _    @☸s↑ @☸s→ _    _    _ _ 
-  _       _    _    _    _    _    _    @☸s← @☸s↓ _    _    _    _  
-  _        _    _    _    _    _    _    _    _    _    _        _   
-  _      _    _             _               _    _    _    _  _    _    
-)
 
 ;; Either there is a bug of a hardware issue when pressing multiple keys (holding three and pressing the fourh): (` = ralt o) works and (` = ralt j) works, but (` = ralt i) and (` = ralt j) don't. The software doesn't detect it at all.
 
@@ -404,67 +238,123 @@
 ;; Numbers hold layouts
 
 (deflayer layout-IPA
-  _    _   _    _   _    _   _    _   _    _  _    _    _   _   _  
-  _     @L1   @L2   @L3   @L4   @L5  @L6   @fnLL   _     _     _    @L-    _   _   
-  _      _     @əw   @əe   @ər   @ət  @əy   @əu    @əi   @əo   _   _    _  _ 
-  _       @əa   @əs   @əd   _     @əg  @əh   @əj    _     @əl    _   _     _  
-  _        @əz   @əx   @əc   _     _    @ən   _      _     @ə.    _        _   
-  _      _    _             _               _    _    _    _  _    _    
+  _   _   _    _   _    _   _    _   _    _  _    _    _   _   _  
+  _   @L1   @L2   @L3   @L4   @L5  @L6   @esc-kbd   _     _     _    @L-    _   _   
+  _    _     @əw   @əe   @ər   @ət  @əy   @əu    @əi   @əo  @əp _    _  _ 
+  _     @əa   @əs   @əd   @əf   @əg  @əh   @əj    @ək     @əl    🔣ː  _     _  
+  _      @əz   @əx   @əc   @əv   @əb   @ən  @əm     _     @ə.    _        _   
+  _       _    _             _              _    _    _    _  _    _    
 )
 
-(defalias əh (tap-hold-press 180 180 h (layer-while-held əh)))
-(deflayermap (əh) spc 🔣ʰ  d 🔣ð  t 🔣θ  s 🔣ʃ  z 🔣ʒ  l 🔣ʎ  g 🔣ɣ  b 🔣β  r 🔣ɹ)
-(defalias əj (tap-hold-press 180 180 j (layer-while-held əj)))
-(deflayermap (əj) spc 🔣ʲ  h 🔣ʝ  3 🔣ʒ)
-(defalias əw (tap-hold-press 180 180 w (layer-while-held əw)))
-(deflayermap (əw) spc 🔣ʷ  l 🔣ɫ  a 🔣ɑ)
+(defalias
+  /tsh (macro 🔣t 🔣͡  🔣ʃ)
+  /ts  (macro 🔣t 🔣͡  🔣s)
+  /dzh (macro 🔣d 🔣͡  🔣ʒ)
+  /dz  (macro 🔣d 🔣͡  🔣z)
+  /pf  (macro 🔣p 🔣͡  🔣f)
+  /ps  (macro 🔣p 🔣͡  🔣s)
+)
 
-(defalias əd (tap-hold-press 180 180 d (layer-while-held əd)))
-(deflayermap (əd) spc (macro 🔣d 🔣͡ )   h 🔣ð j (macro 🔣d 🔣͡  🔣ʒ) )
-(defalias ət (tap-hold-press 180 180 t (layer-while-held ət)))
-(deflayermap (ət) spc (macro 🔣t 🔣͡ )   h 🔣θ  r 🔣ɾ  s (macro 🔣t 🔣͡  🔣ʃ))
-(defalias əs (tap-hold-press 180 180 s (layer-while-held əs)))
-(deflayermap (əs) spc 🔣ʃ   h 🔣ʃ)
-(defalias əz (tap-hold-press 180 180 z (layer-while-held əz)))
-(deflayermap (əz) spc 🔣ʒ   h 🔣ʒ)
-(defalias əx (tap-hold-press 180 180 x (layer-while-held əx)))
-(deflayermap (əx) spc 🔣ɕ   h 🔣ɕ)
-(defalias əc (tap-hold-press 180 180 c (layer-while-held əc)))
-(deflayermap (əc) spc 🔣ç   h 🔣ç)
-(defalias əb (tap-hold-press 180 180 b (layer-while-held əb)))
-(deflayermap (əb) spc 🔣β   h 🔣β)
-(defalias ə. (tap-hold-press 180 180 . (layer-while-held ə.)))
-(deflayermap (ə.) spc 🔣ʔ)
+(defalias
+  əw (tap-dance 200 ((chord IPA w) 🔣ʷ))
+  əf (tap-dance 200 ((chord IPA f)))
+  ək (tap-dance 200 ((chord IPA k)))
+  əm (tap-dance 200 ((chord IPA m) 🔣ɱ))
+  əe (tap-dance 200 ((chord IPA e) 🔣ə 🔣ɛ 🔣ɜ 🔣ɚ 🔣ɝ))
+  ər (tap-dance 200 ((chord IPA r) 🔣ɾ 🔣ɹ 🔣ʁ 🔣ʀ))
+  əb (tap-dance 200 ((chord IPA b) 🔣β))
+  əv (tap-dance 200 ((chord IPA v) 🔣ʋ 🔣ⱱ))
+  əp (tap-dance 200 ((chord IPA p) 🔣ɸ))
+  əs (tap-dance 200 ((chord IPA s) 🔣ʃ 🔣ʂ))
+  əz (tap-dance 200 ((chord IPA z) 🔣ʒ 🔣ʐ))
+  ət (tap-dance 200 ((chord IPA t) 🔣θ 🔣ʈ))
+  əd (tap-dance 200 ((chord IPA d) 🔣ð 🔣ɖ))
+  ən (tap-dance 200 ((chord IPA n) 🔣ŋ 🔣ɲ 🔣ɳ))
+  əy (tap-dance 200 ((chord IPA y) 🔣ʏ))
+  əi (tap-dance 200 ((chord IPA i) 🔣ɪ 🔣ɨ))
+  əu (tap-dance 200 ((chord IPA u) 🔣ʊ 🔣ʉ 🔣ɯ))
+  əo (tap-dance 200 ((chord IPA o) 🔣ɔ 🔣ɒ 🔣œ 🔣ɶ))
+  əa (tap-dance 200 ((chord IPA a) 🔣ʌ 🔣ɑ 🔣æ 🔣ɐ))
+  əg (tap-dance 200 ((chord IPA g) 🔣ɣ 🔣ɢ))
+  əh (tap-dance 200 ((chord IPA h) 🔣ʰ 🔣ɦ 🔣ħ))
+  əj (tap-dance 200 ((chord IPA j) 🔣ʒ 🔣ʲ 🔣ʝ 🔣ɟ))
+  əl (tap-dance 200 ((chord IPA l) 🔣ʎ 🔣ɫ))
+  əx (tap-dance 200 ((chord IPA x) 🔣χ 🔣ɕ))
+  əc (tap-dance 200 ((chord IPA c) 🔣ç 🔣ɕ))
+  ə. (tap-dance 200 ((chord IPA .) 🔣ʔ 🔣ʕ 🔣ʡ 🔣ʘ 🔣ǂ))
+)
+(defchords IPA 350
+  (w) w (e) e (r) r (t) t (y) y (u) u (i) i (o) o (p) p
+  (a) a (s) s (d) d (f) f (g) g (h) h (j) j (k) k (l) l
+  (z) z (x) x (c) c (v) v (b) b (n) n (m) m       (.) .
+  (l h) 🔣ʎ   (l w) 🔣ɫ
+  (g h) 🔣ɣ   
+  ;; (g n) 🔣ɲ ;; Italian
+  (n g) 🔣ŋ ;; English
+  (n h) 🔣ɳ
+  (r t) 🔣ɾ   (r h) 🔣ɹ   (r g) 🔣ʁ
+  (o w) 🔣ɒ   (a w) 🔣ɑ
+  (a e) 🔣æ   (o e) 🔣ø   (e o a) 🔣œ
+  (p h) 🔣ɸ   (p f) @/pf  (p s) @/ps 
+  (t h) 🔣θ   (t s h) @/tsh   (t s) @/ts   (t c) @/tsh
+  (d h) 🔣ð   (d z h) @/dzh   (d z) @/dz   (d j) @/dzh
+  (s h) 🔣ʃ   (z h) 🔣ʒ
+  (b h) 🔣β   (x h) 🔣ɕ   (c h) 🔣ç
+)
 
-(defalias əl (tap-hold-press 180 180 l (layer-while-held əl)))
-(deflayermap (əl) spc 🔣ʎ   l 🔣ʎ  w 🔣ɫ)
-(defalias əg (tap-hold-press 180 180 g (layer-while-held əg)))
-(deflayermap (əg) spc 🔣ɣ  h 🔣ɣ  r 🔣ʁ  n 🔣ŋ)
-(defalias ən (tap-hold-press 180 180 n (layer-while-held ən)))
-(deflayermap (ən) spc n    j 🔣ɲ  g 🔣ŋ  h 🔣ɳ)
-(defalias ər (tap-hold-press 180 180 r (layer-while-held ər)))
-(deflayermap (ər) spc r    t 🔣ɾ  h 🔣ɹ  g 🔣ʁ)
+;; (defalias əh (tap-hold 180 180 h (layer-while-held əh)))
+;; (deflayermap (əh) spc 🔣ʰ  d 🔣ð  t 🔣θ  s 🔣ʃ  z 🔣ʒ  l 🔣ʎ  g 🔣ɣ  b 🔣β  r 🔣ɹ)
+;; (defalias əj (tap-hold 180 180 j (layer-while-held əj)))
+;; (deflayermap (əj) spc 🔣ʲ  h 🔣ʝ  3 🔣ʒ)
+;; (defalias əw (tap-hold 180 180 w (layer-while-held əw)))
+;; (deflayermap (əw) spc 🔣ʷ  l 🔣ɫ  a 🔣ɑ)
 
-(defalias əe (tap-hold-press 180 180 e (layer-while-held əe)))
-(deflayermap (əe) spc 🔣ə  a 🔣ɜ  o 🔣ø)
-(defalias əu (tap-hold-press 180 180 u (layer-while-held əu)))
-(deflayermap (əu) spc 🔣ʊ)
-(defalias əi (tap-hold-press 180 180 i (layer-while-held əi)))
-(deflayermap (əi) spc 🔣ɪ)
-(defalias əy (tap-hold-press 180 180 y (layer-while-held əy)))
-(deflayermap (əy) spc 🔣ʏ)
-(defalias əa (tap-hold-press 180 180 a (layer-while-held əa)))
-(deflayermap (əa) spc a    e 🔣æ  h 🔣ʌ  w 🔣ɑ)
-(defalias əo (tap-hold-press 180 180 o (layer-while-held əo)))
-(deflayermap (əo) spc 🔣ø  e 🔣œ  h 🔣ɔ  w 🔣ɒ)
+;; (defalias əd (tap-hold 180 180 d (layer-while-held əd)))
+;; (deflayermap (əd) spc (macro 🔣d 🔣͡ )   h 🔣ð j (macro 🔣d 🔣͡  🔣ʒ) )
+;; (defalias ət (tap-hold 180 180 t (layer-while-held ət)))
+;; (deflayermap (ət) spc (macro 🔣t 🔣͡ )   h 🔣θ  r 🔣ɾ  s (macro 🔣t 🔣͡  🔣ʃ))
+;; (defalias əs (tap-hold 180 180 s (layer-while-held əs)))
+;; (deflayermap (əs) spc 🔣ʃ   h 🔣ʃ)
+;; (defalias əz (tap-hold 180 180 z (layer-while-held əz)))
+;; (deflayermap (əz) spc 🔣ʒ   h 🔣ʒ)
+;; (defalias əx (tap-hold 180 180 x (layer-while-held əx)))
+;; (deflayermap (əx) spc 🔣ɕ   h 🔣ɕ)
+;; (defalias əc (tap-hold 180 180 c (layer-while-held əc)))
+;; (deflayermap (əc) spc 🔣ç   h 🔣ç)
+;; (defalias əb (tap-hold 180 180 b (layer-while-held əb)))
+;; (deflayermap (əb) spc 🔣β   h 🔣β)
+;; (defalias ə. (tap-hold 180 180 . (layer-while-held ə.)))
+;; (deflayermap (ə.) spc 🔣ʔ)
 
-(defalias L1 (tap-hold-press 180 180 1 (layer-while-held layout-greek)))
-(defalias L2 (tap-hold-press 180 180 2 (layer-while-held layout-mathcal)))
-(defalias L3 (tap-hold-press 180 180 3 (layer-while-held layout-mathbb)))
-(defalias L4 (tap-hold-press 180 180 4 (layer-while-held layout-keyboard)))
-(defalias L5 (tap-hold-press 180 180 5 (layer-while-held layout-emoji)))
-(defalias L6 (tap-hold-press 180 180 6 (layer-while-held layout-superscript)))
-(defalias L- (tap-hold-press 180 180 - (layer-while-held layout-subscript)))
+;; (defalias əl (tap-hold 180 180 l (layer-while-held əl)))
+;; (deflayermap (əl) spc 🔣ʎ   l 🔣ʎ  w 🔣ɫ)
+;; (defalias əg (tap-hold 180 180 g (layer-while-held əg)))
+;; (deflayermap (əg) spc 🔣ɣ  h 🔣ɣ  r 🔣ʁ  n 🔣ŋ)
+;; (defalias ən (tap-hold 180 180 n (layer-while-held ən)))
+;; (deflayermap (ən) spc n    j 🔣ɲ  g 🔣ŋ  h 🔣ɳ)
+;; (defalias ər (tap-hold 180 180 r (layer-while-held ər)))
+;; (deflayermap (ər) spc r    t 🔣ɾ  h 🔣ɹ  g 🔣ʁ)
+
+;; (defalias əe (tap-hold 180 180 e (layer-while-held əe)))
+;; (deflayermap (əe) spc 🔣ə  a 🔣ɜ  o 🔣ø)
+;; (defalias əu (tap-hold 180 180 u (layer-while-held əu)))
+;; (deflayermap (əu) spc 🔣ʊ)
+;; (defalias əi (tap-hold 180 180 i (layer-while-held əi)))
+;; (deflayermap (əi) spc 🔣ɪ)
+;; (defalias əy (tap-hold 180 180 y (layer-while-held əy)))
+;; (deflayermap (əy) spc 🔣ʏ)
+;; (defalias əa (tap-hold 180 180 a (layer-while-held əa)))
+;; (deflayermap (əa) spc a    e 🔣æ  h 🔣ʌ  w 🔣ɑ)
+;; (defalias əo (tap-hold 180 180 o (layer-while-held əo)))
+;; (deflayermap (əo) spc 🔣ø  e 🔣œ  h 🔣ɔ  w 🔣ɒ)
+
+(defalias L1 (tap-hold 180 180 1 (layer-while-held layout-greek)))
+(defalias L2 (tap-hold 180 180 2 (layer-while-held layout-mathcal)))
+(defalias L3 (tap-hold 180 180 3 (layer-while-held layout-mathbb)))
+(defalias L4 (tap-hold 180 180 4 (layer-while-held layout-keyboard)))
+(defalias L5 (tap-hold 180 180 5 (layer-while-held layout-emoji)))
+(defalias L6 (tap-hold 180 180 6 (layer-while-held layout-superscript)))
+(defalias L- (tap-hold 180 180 - (layer-while-held layout-subscript)))
 
 (deflayer layout-qwerty ;; for reference
   _    _   _    _   _    _   _    _   _    _  _    _    _   _   _  
@@ -570,7 +460,6 @@
   (defvirtualkeys $vk-name $output-action)
   (defseq $vk-name $input-keys)
 )
-
 (template-expand def-seq \perp         (\ p e r p                   spc) (unicode ⟂))
 (template-expand def-seq \xi           (\ x i                       spc) (unicode ξ))
 (template-expand def-seq \omega        (\ o m e g a                 spc) (unicode ω))
@@ -618,6 +507,7 @@
 (template-expand def-seq \cdots        (\ c d o t s                 spc) (unicode ⋯))
 (template-expand def-seq \updelta      (\ u p d e l t a             spc) (unicode δ))
 (template-expand def-seq \dag          (\ d a g                     spc) (unicode †))
+(template-expand def-seq \planck       (\ p l a n c k               spc) (unicode ħ))
 (template-expand def-seq \rangle       (\ r a n g l e               spc) (unicode 〉))
 (template-expand def-seq \langle       (\ l a n g l e               spc) (unicode 〈))
 (template-expand def-seq \cala         (\ c a l a                   spc) (unicode 𝓐))
