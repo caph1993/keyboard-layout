@@ -70,7 +70,7 @@
 (deflayer main
   @esc  f1  f2   f3  f4   f5  f6   f7  f8   f9 f10  f11  f12 ins del
   `     1    2    3    4    5    6    7    8    9    0    -    = bspc
-  @tab   q    w    e    r    t    y    u    i    o    p    @[   @] @\ 
+  @tab   q    w    e    r    t    y    u    i    o    p    [   @]  \ 
   @caps  a    s    d    f    g    h    j    k    l    ;    '    ret
   lsft     z    x    c    v    b    n    m    ,    .    /        rsft
   lctl  @lmet lalt          spc             ralt  rctl @←  @↑ @↓   @→
@@ -191,31 +191,21 @@
 (defalias tab (tap-hold-press 180 180 tab @theTab))
 (deflayermap (tab-mods) ` S-tab  1  tab)
 
-
 (defalias 🖰🖰   (multi nop1 (on-press press-vkey 🖰🖰)))
 (defvirtualkeys 🖰🖰 nop1)
 
 (defalias arrows-extra (multi (layer-while-held num-mods) (on-release release-vkey 🖰🖰)))
 
-
-(defalias arrows] (multi @arrows-extra (layer-while-held arrows])))
+(defalias arrows] (multi @arrows-extra (layer-while-held arrows])  (on-release release-vkey 🖰🖰)))
 
 ;; (defalias ] (tap-hold-press 180 180 ] @arrows]))
 (defalias ] (tap-dance 180 (
-  (tap-hold-press 180 180 ] @arrows])
-  (tap-hold-press 180 180 (macro ] ]) (multi lsft @arrows]))
+  (tap-hold-press 180 180 ] (multi @arrows] (fork XX nop1 (ralt))))
+  (tap-hold-press 180 180 (macro ] ]) (multi lsft (multi @arrows] (fork XX nop1 (ralt)))))
 )))
 
-(defalias arrows[ (multi @arrows-extra (layer-while-held arrows[)))
-;; (defalias [ (tap-hold-press 180 180 [ @arrows[))
-(defalias [ [)
-(defalias arrows\ (multi @arrows-extra (layer-while-held arrows\)))
 (defalias \ \)
 (defalias \sldr (multi @sldr-tray (macro (unicode /) 150 bspc sldr 5 \)))
-;; (defalias \ (tap-dance-eager 180 (
-;;   (tap-hold-press 180 180 \ @arrows\)
-;;   (multi @sldr-tray (macro bspc (unicode 🤓) 150 bspc sldr 5 \))
-;; )))
 
 (deflayermap (num-mods)
   ;; 2 lsft   3 lctl  4 @<=>
@@ -226,11 +216,10 @@
   f11 (multi @sldr-tray sldr)
   f12 lrld
 )
-(deflayermap (F-actions)
-  f1 (unmod 🔇)  f2 (unmod 🔉)  f3 (unmod 🔊)  f5 (unmod ⌨💡+)
-  f6 (unmod 🔅)  f7 (unmod 🔆)
-)
-(defalias [] (macro [ ]))
+;; (deflayermap (F-actions)
+;;   f1 (unmod 🔇)  f2 (unmod 🔉)  f3 (unmod 🔊)  f5 (unmod ⌨💡+)
+;;   f6 (unmod 🔅)  f7 (unmod 🔆)
+;; )
 
 (deflayer arrows]
   _   _   _    _   _    _   _    _   _     _  _    _    _      _      @del
@@ -239,23 +228,6 @@
   _        C-a  C-s  C-d   C-f  C-g  XX   XX     @←    @↓  @del      _ _
   _         C-z  C-x  C-c   C-v  C-b  XX   @btn1 @btn2 _            _ _
   _            _    _               _              @<=>  _   _  _  _  _
-)
-
-(deflayer arrows[
-  _   _   _    _   _    _   _    _    _    _  _    _    _      _     @del
-  _     _     _     _    _    _    _     _    _    _    _    @🖰🖰   _ @bspc
-  _       C-q  C-w  C-e  C-r  C-t   XX    @bspc @↑   @→   @→→  _   @[]  @\sldr
-  _        C-a  C-s  C-d   C-f  XX   @←←   @←    @↓  @del      _   _  _
-  _         C-z  C-x  C-c   C-v  XX   @btn1 @btn2 _            _   _  _
-  _            _    _               _              @<=>  _   _  _  _  _
-)
-(deflayer arrows\
-  _   _   _    _   _    _   _    _   _    _  _     _    _      _       @del
-  _     _     _     _    _    _     _    _    _     _    _    _    _    @🖰🖰
-  _       C-q  C-w  C-e  C-r  C-t   C-y  XX   XX    @bspc @↑   @→   @→→  _
-  _        C-a  C-s  C-d   C-f  C-g  C-h  XX   @←←   @←    @↓  @del      _
-  _         C-z  C-x  C-c   C-v  C-b  C-n  XX   @btn1 @btn2 _            _
-  _            _    _               _             @<=>  _   _  _  _  _
 )
 
 ;; nop0 is the "go to extreme" button <=>l
