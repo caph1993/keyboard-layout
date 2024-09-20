@@ -68,15 +68,28 @@
 ;; )
 
 (deflayer main
-  @esc  f1  f2   f3  f4   f5  f6   f7  f8   f9 f10  f11  f12 ins del
+  @esc  f1 f2   f3  f4   f5  f6   f7  f8   f9 f10  f11  f12 ins del
   `     1    2    3    4    5    6    7    8    9    0    -    = bspc
   @tab   q    w    e    r    t    y    u    i    o    p    [   @]  \ 
   @caps  a    s    d    f    g    h    j    k    l    ;    '    ret
   lsft     z    x    c    v    b    n    m    ,    .    /        rsft
-  lctl  @lmet lalt          spc             ralt  rctl @←  @↑ @↓   @→
+  @lmet  @alt* @ctl*        spc             ralt  rctl @←  @↑ @↓   @→
 )
 (defalias esc  (multi esc (on-press tap-vkey L0) )) ;; tap esc to exit custom layouts
 (defalias lmet (tap-dance 200 ((tap-hold-press 200 200 XX lmet) lmet))) ;; hold or tap twice to activate. Single tap is disabled
+
+
+;; Invert ctrl and tab, except for alt tab and alt F4
+(defalias ctl* (multi lctl (layer-while-held alt-tab) (on-release release-vkey alt-tab)))
+(deflayermap (alt-tab)
+  tab (multi lalt (unmod (lctl) tab) (on-press press-vkey alt-tab))
+  F4 (multi lalt (unmod (lctl) F4))
+)
+(defvirtualkeys alt-tab lalt)
+
+(defalias alt* (multi lalt (layer-while-held ctl-tab) (on-release release-vkey ctl-tab)))
+(deflayermap (ctl-tab) tab (multi lctl (unmod (lalt) tab) (on-press press-vkey ctl-tab)))
+(defvirtualkeys ctl-tab lctl)
 
 ;; Reference layers for copy-paste
 (deflayer empty
@@ -178,17 +191,13 @@
   ☸↓ (fork @☸↓n @☸↓s (nop2))
 )
 
-(defalias caps (tap-dance-eager 200 (
-  (multi lctl (layer-while-held num-mods))
-  caps
-)))
-
 ;; ----------------------------------------------------------
 ;; Tab and arrows layer
 ;; ----------------------------------------------------------
 
-(defalias theTab (multi lctl (layer-while-held num-mods) (layer-while-held tab-mods)))
-(defalias tab (tap-hold-press 180 180 tab @theTab))
+(defalias holdTab (multi lctl (layer-while-held num-mods) (layer-while-held tab-mods)))
+(defalias tapTab tab)
+(defalias tab (tap-hold-press 200 200 @tapTab @holdTab))
 (deflayermap (tab-mods) ` S-tab  1  tab)
 
 (defalias 🖰🖰   (multi nop1 (on-press press-vkey 🖰🖰)))
@@ -198,10 +207,15 @@
 
 (defalias arrows] (multi @arrows-extra (layer-while-held arrows])  (on-release release-vkey 🖰🖰)))
 
-;; (defalias ] (tap-hold-press 180 180 ] @arrows]))
-(defalias ] (tap-dance 180 (
-  (tap-hold-press 180 180 ] (multi @arrows] (fork XX nop1 (ralt))))
-  (tap-hold-press 180 180 (macro ] ]) (multi lsft (multi @arrows] (fork XX nop1 (ralt)))))
+;; defalias ] (tap-hold-press 200 200 ] @arrows]))
+(defalias ] (tap-dance 200 (
+  (tap-hold-press 200 200 ] (multi @arrows] (fork XX nop1 (ralt))))
+  (tap-hold-press 200 200 (macro ] ]) (multi lsft (multi @arrows] (fork XX nop1 (ralt)))))
+)))
+
+(defalias caps (tap-dance-eager 200 (
+  @arrows]
+  (tap-hold-press 200 200 caps (multi lsft @arrows]))
 )))
 
 (defalias \ \)
@@ -222,12 +236,12 @@
 ;; )
 
 (deflayer arrows]
-  _   _   _    _   _    _   _    _   _     _  _    _    _      _      @del
-  _     _     _     _    _    _     _    _     _    _    _    _    @🖰🖰 @bspc
-  _       C-q  C-w  C-e  C-r  C-t   C-y  XX    @bspc @↑   @→   XX   _ @\sldr
-  _        C-a  C-s  C-d   C-f  C-g  XX   XX     @←    @↓  @del      _ _
-  _         C-z  C-x  C-c   C-v  C-b  XX   @btn1 @btn2 _            _ _
-  _            _    _               _              @<=>  _   _  _  _  _
+  _   _   _    _   _    _   _    _   _     _  _    _    _      _   @del
+  _     _     _     _    _    _     _    _     _     _    _     _  @🖰🖰 @bspc
+  _       C-q  C-w  C-e  C-r  C-t   @Cbspc @bspc @↑   @→   @C→   XX  ] @\sldr
+  _        C-a  C-s  C-d   C-f  C-g  @C←   @←    @↓   @del  @Cdel XX   C-ret
+  _         C-z  C-x  C-c   C-v  XX   @btn1 @btn2 XX   XX    C-/           _
+  _            _    _               _              @<=>  _    _   _   _   _
 )
 
 ;; nop0 is the "go to extreme" button <=>l
@@ -239,13 +253,15 @@
 (defalias ↑    (fork (fork up    pgup   (nop0)) (fork   @🖱↑   @☸↑   (nop0))   (nop1)))
 (defalias ↓    (fork (fork down  pgdn   (nop0)) (fork   @🖱↓   @☸↓   (nop0))   (nop1)))
 (defalias →    (fork (fork right end    (nop0)) (fork   @🖱→   @☸→   (nop0))   (nop1)))
-(defalias ←←   (fork (fork C-left (unmod (lctl rctl) home) (lctl rctl ctl nop0)) XX (nop1)))
-(defalias →→   (fork (fork C-right (unmod (lctl rctl) end) (lctl rctl ctl nop0)) XX (nop1)))
+(defalias C←   (fork (fork C-left (unmod (lctl rctl) home) (lctl rctl ctl nop0)) XX (nop1)))
+(defalias C→   (fork (fork C-right (unmod (lctl rctl) end) (lctl rctl ctl nop0)) XX (nop1)))
 (defalias btn1 (fork ret 🖰1   (nop1)))
 (defalias btn2 (fork esc 🖰2   (nop1)))
 (defalias btn3 (fork esc 🖰3   (nop1)))
 (defalias bspc (fork bspc (macro S-home (unmod bspc)) (nop0)))
-(defalias del  (fork del  (macro S-end  (unmod del) ) (nop0)))
+(defalias del  (fork del  (macro S-end  (unmod del )) (nop0)))
+(defalias Cbspc (fork (fork C-bspc (macro S-home (unmod bspc)) (nop0)) XX (nop1)))
+(defalias Cdel  (fork (fork C-del  (macro S-home (unmod del )) (nop0)) XX (nop1)))
 
 
 ;; Either there is a bug of a hardware issue when pressing multiple keys (holding three and pressing the fourh): (` = ralt o) works and (` = ralt j) works, but (` = ralt i) and (` = ralt j) don't. The software doesn't detect it at all.
