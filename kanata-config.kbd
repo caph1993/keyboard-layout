@@ -73,21 +73,27 @@
   @tab   q    w    e    r    t    y    u    i    o    p    [   @]  \ 
   @caps  a    s    d    f    g    h    j    k    l    ;    '    ret
   lsft     z    x    c    v    b    n    m    ,    .    /        rsft
-  @lmet  @alt* @ctl*        spc             ralt  rctl @←  @↑ @↓   @→
+  lctl   @alt* @ctl*        spc             ralt  rctl @←  @↑ @↓   @→
 )
 (defalias esc  (multi esc (on-press tap-vkey L0) )) ;; tap esc to exit custom layouts
 (defalias lmet (tap-dance 200 ((tap-hold-press 200 200 XX lmet) lmet))) ;; hold or tap twice to activate. Single tap is disabled
 
 
 ;; Invert ctrl and tab, except for alt tab and alt F4
-(defalias ctl* (multi lctl (layer-while-held alt-tab) (on-release release-vkey alt-tab)))
+(defalias ctl* (tap-dance-eager 200 (
+  (multi lctl      (layer-while-held alt-tab) (on-release release-vkey alt-tab))
+  (multi lctl lsft (layer-while-held alt-tab) (on-release release-vkey alt-tab))
+)))
 (deflayermap (alt-tab)
   tab (multi lalt (unmod (lctl) tab) (on-press press-vkey alt-tab))
   F4 (multi lalt (unmod (lctl) F4))
 )
 (defvirtualkeys alt-tab lalt)
 
-(defalias alt* (multi lalt (layer-while-held ctl-tab) (on-release release-vkey ctl-tab)))
+(defalias alt* (tap-dance-eager 200 (
+  (multi lalt (layer-while-held ctl-tab) (on-release release-vkey ctl-tab))
+  (tap-hold-press 200 200 XX lmet)
+)))
 (deflayermap (ctl-tab) tab (multi lctl (unmod (lalt) tab) (on-press press-vkey ctl-tab)))
 (defvirtualkeys ctl-tab lctl)
 
@@ -212,7 +218,6 @@
   (tap-hold-press 200 200 ] (multi @arrows] (fork XX nop1 (ralt))))
   (tap-hold-press 200 200 (macro ] ]) (multi lsft (multi @arrows] (fork XX nop1 (ralt)))))
 )))
-
 (defalias caps (tap-dance-eager 200 (
   @arrows]
   (tap-hold-press 200 200 caps (multi lsft @arrows]))
