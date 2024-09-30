@@ -205,89 +205,59 @@
 ;; Tab and arrows layer
 ;; ----------------------------------------------------------
 
-
-(defalias num-mods (multi (layer-while-held num-mods) (on-release release-vkey 🖰🖰)))
-(deflayermap (num-mods)
-  ;; 2 lsft   3 lctl  4 @<=>
-  9 (multi sft (unmod (ctl) 9))
-  0 (multi sft (unmod (ctl) 0))
-  f1 C-c
-  f2 C-v
-  f3 C-x
-  f10 @L↔
-  ;; f9 @IPA
-  f11 (multi @sldr-tray sldr)
-  f12 lrld
-)
+(defalias holdTab (multi lctl (layer-while-held num-mods) (layer-while-held tab-mods)))
+(defalias tapTab tab)
+(defalias tab (tap-hold-press 200 200 @tapTab @holdTab))
+(deflayermap (tab-mods) ` S-tab  1  tab)
 
 (defalias 🖰🖰   (multi nop1 (on-press press-vkey 🖰🖰)))
 (defvirtualkeys 🖰🖰 nop1)
 
-(defalias arrows-jiko (multi @num-mods (layer-while-held arrows-jiko)  (on-release release-vkey 🖰🖰)))
-(deflayer arrows-jiko
-  _   _   _    _   _    _   _    _   _     _  _    _    _      _   @del
-  _     _     _     _    _    _     _    _     _     _    _     _  @🖰🖰 @bspc
-  _       C-q  C-w  C-e  C-r  C-t   XX @bspc @↑   @→   XX   @ctl**  @<=> @\sldr
-  _        C-a  C-s  C-d   C-f  C-g  XX  @←    @↓   @del  XX XX   C-ret
-  _         C-z  C-x  C-c   C-v  XX   @btn1 @btn2 XX   XX    C-/           _
-  _            _    _          @spc-sft                 @<=>  _    _   _   _   _
-)
+(defalias arrows-extra (multi (layer-while-held num-mods) (on-release release-vkey 🖰🖰)))
 
+(defalias arrows] (multi @arrows-extra (layer-while-held arrows])  (on-release release-vkey 🖰🖰)))
 
-(defalias mods-234 (layer-while-held mods-234))
-(deflayermap (mods-234) 3 (multi ctl @mods-234) 2 (multi lsft @mods-234) 4 (multi @<=> @mods-234))
-(defalias arrows-jiko-234 (multi @mods-234 @arrows-jiko))
-
-
-(defvirtualkeys valt lalt)
-(defvirtualkeys vctl lctl)
-(deflayermap (mods-tab)
-  ` (fork XX (tap-hold-press 200 200
-      (multi lctl (unmod (lalt) tab) (on-press press-vkey vctl))
-      (multi lctl @<=>) ;; Activates ctrlpgpup and ctrlpgpdown
-    ) (nop4))
-  1 (fork XX (multi lalt (unmod (lctl) tab) (on-press press-vkey valt)) (nop4))
-  2 (tap-dance-eager 200 (
-    (multi lsft @mods-tab)
-    (multi nop1 @mods-tab)
-  ))
-  3 (multi lctl @mods-tab)
-  4 (multi @<=> @mods-tab)
-)
-(defalias mods-tab (multi (layer-while-held mods-tab) (on-release release-vkey valt) (on-release release-vkey vctl)))
-(defalias holdTab (multi nop4 @mods-tab @arrows-jiko))
-(defalias tapTab tab)
-(defalias tab (tap-hold-press 200 200 @tapTab @holdTab))
-
-
-
-;; defalias ] (tap-hold-press 200 200 ] @arrows-jiko))
+;; defalias ] (tap-hold-press 200 200 ] @arrows]))
 (defalias ] (tap-dance 200 (
-  (tap-hold-press 200 200 ] (multi @arrows-jiko (fork XX nop1 (ralt))))
-  (tap-hold-press 200 200 (macro ] ]) (multi lsft (multi @arrows-jiko (fork XX nop1 (ralt)))))
+  (tap-hold-press 200 200 ] (multi @arrows] (fork XX nop1 (ralt))))
+  (tap-hold-press 200 200 (macro ] ]) (multi lsft (multi @arrows] (fork XX nop1 (ralt)))))
 )))
 (defalias caps (tap-dance-eager 200 (
-  @arrows-jiko
-  (tap-hold-press 200 200 caps (multi lsft @arrows-jiko))
-  (multi nop1 @arrows-jiko)
+  @arrows]
+  (tap-hold-press 200 200 caps (multi lsft @arrows]))
+  (multi nop1 @arrows])
 )))
 
 (defalias \ \)
 (defalias \sldr (multi @sldr-tray (macro (unicode /) 150 bspc sldr 5 \)))
 
-
+(deflayermap (num-mods)
+  ;; 2 lsft   3 lctl  4 @<=>
+  9 (multi sft (unmod (ctl) 9))
+  0 (multi sft (unmod (ctl) 0))
+  f1 @L↔
+  ;; f9 @IPA
+  f11 (multi @sldr-tray sldr)
+  f12 lrld
+)
 ;; (deflayermap (F-actions)
 ;;   f1 (unmod 🔇)  f2 (unmod 🔉)  f3 (unmod 🔊)  f5 (unmod ⌨💡+)
 ;;   f6 (unmod 🔅)  f7 (unmod 🔆)
 ;; )
 
-
+(deflayer arrows]
+  _   _   _    _   _    _   _    _   _     _  _    _    _      _   @del
+  _     _     _     _    _    _     _    _     _     _    _     _  @🖰🖰 @bspc
+  _       C-q  C-w  C-e  C-r  C-t   XX @bspc @↑   @→   XX   lctl  @<=> @\sldr
+  _        C-a  C-s  C-d   C-f  C-g  XX  @←    @↓   @del  XX XX   C-ret
+  _         C-z  C-x  C-c   C-v  XX   @btn1 @btn2 XX   XX    C-/           _
+  _            _    _          @spc-sft                 @<=>  _    _   _   _   _
+)
 
 ;; nop0 is the "go to extreme" button <=>l
 ;; nop3 is a "ctl" button. All ctl buttons trigger nop3, except the tab key for which certain keys are unmoded.
 ;; Repeated arrow means ctrl+arrow (word jump). Only defined for left and right.
 
-(defalias ctl** (tap-dance-eager 200 ((multi lctl) (multi lctl lsft))))
 (defalias <=>  (multi nop0))
 (defalias ←    (fork (fork (fork left    C-left   (nop3)) home   (nop0)) (fork   @🖱←   @☸←   (nop0))   (nop1)))
 (defalias ↑    (fork (fork (fork up      C-up     (nop3)) pgup   (nop0)) (fork   @🖱↑   @☸↑   (nop0))   (nop1)))
