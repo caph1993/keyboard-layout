@@ -69,36 +69,37 @@
 
 (deflayer main
   @esc  f1 f2   f3  f4   f5  f6   f7  f8   f9 f10  f11  f12 ins del
-  @`    1    2    3    4    5    6    7    8    9    0    -    = bspc
+  @`     1    2    3    4    5    6    7    8    9    0    -    = bspc
   @tab   q    w    e    r    t    y    u    i    o    p    [   @]  \ 
-  @caps   a    s    d    f    g    h    j    k    l    ;    '    ret
+  @caps  a    s    d    f    g    h    j    k    l    ;    '    ret
   lsft     z    x    c    v    b    n    m    ,    .    /        rsft
-  lctl   lmet  lalt    spc             ralt  rctl @←  @↑ @↓   @→
+  lctl   @alt* @ctl*        spc             ralt  rctl @←  @↑ @↓   @→
 )
 (defalias esc  (multi esc (on-press tap-vkey L0) )) ;; tap esc to exit custom layouts
 (defalias lmet (tap-dance 200 ((tap-hold-press 200 200 XX lmet) lmet))) ;; hold or tap twice to activate. Single tap is disabled
 
 
 ;; Invert ctrl and tab, except for alt tab and alt F4
-;; (defalias ctl* (tap-dance-eager 200 (
-;;   (multi lctl      (layer-while-held alt-tab) (on-release release-vkey alt-tab))
-;;   (multi lctl lsft (layer-while-held alt-tab) (on-release release-vkey alt-tab))
-;; )))
-;; (deflayermap (alt-tab)
-;;   tab (multi lalt (unmod (lctl) tab) (on-press press-vkey alt-tab))
-;;   F4 (multi lalt (unmod (lctl) F4))
-;; )
-;; (defvirtualkeys alt-tab lalt)
+(defalias ctl* (tap-dance-eager 200 (
+  (multi lctl      (layer-while-held alt-tab) (on-release release-vkey alt-tab))
+  (multi lctl lsft (layer-while-held alt-tab) (on-release release-vkey alt-tab))
+)))
+(deflayermap (alt-tab)
+  tab (multi lalt (unmod (lctl) tab) (on-press press-vkey alt-tab))
+  F4 (multi lalt (unmod (lctl) F4))
+)
+(defvirtualkeys alt-tab lalt)
 
-;; (defalias alt* (tap-dance-eager 200 (
-;;   (multi lalt (layer-while-held ctl-tab) (on-release release-vkey ctl-tab))
-;;   (tap-hold-press 200 200 XX lmet)
-;; )))
-;; (deflayermap (ctl-tab) tab (multi lctl (unmod (lalt) tab) (on-press press-vkey ctl-tab)))
-;; (defvirtualkeys ctl-tab lctl)
+(defalias alt* (tap-dance-eager 200 (
+  (multi lalt (layer-while-held ctl-tab) (on-release release-vkey ctl-tab))
+  (tap-hold-press 200 200 XX lmet)
+)))
+(deflayermap (ctl-tab) tab (multi lctl (unmod (lalt) tab) (on-press press-vkey ctl-tab)))
+(defvirtualkeys ctl-tab lctl)
 
 (defalias ` (tap-hold-press 200 200 ` (multi lctl (layer-while-held disabled) (layer-while-held `))))
 (deflayermap (`) 1 c 2 v 3 x)
+
 
 ;; Reference layers for copy-paste
 (deflayer empty
@@ -228,7 +229,7 @@
 (deflayer arrows-jiko
   _   _   _    _   _    _   _    _   _     _  _    _    _      _   @del
   _     _     _     _    _    _     _    _     _     _    _     _  _  @bspc
-  _       C-q  C-w  C-e  C-r  C-t   XX @bspc @↑   @→   XX   @ctl>  XX  @\sldr
+  _       C-q  C-w  C-e  C-r  C-t   XX @bspc @↑   @→   XX   @ctl**  @<=> @\sldr
   _        C-a  C-s  C-d   C-f  C-g  XX  @←    @↓   @del  XX XX   C-ret
   _         C-z  C-x  C-c   C-v  XX   @btn1 @btn2 XX   XX    C-/           _
   _            _    _          @spc-sft                 @<=>  _    _   _   _   _
@@ -240,31 +241,23 @@
 (defalias arrows-jiko-234 (multi @mods-234 @arrows-jiko))
 
 
-(defalias <=>  (multi nop0))
-(defalias ctl> (tap-dance-eager 200 (lctl @<=> (multi lctl))))
-
 (defvirtualkeys valt lalt)
 (defvirtualkeys vctl lctl)
 (deflayermap (mods-tab)
   ` (fork XX (tap-hold-press 200 200
       (multi lctl (unmod (lalt) tab) (on-press press-vkey vctl))
       (multi lctl @<=>) ;; Activates ctrlpgpup and ctrlpgpdown
-    ) (nop4)) ;; If tab is being presed, nop4 is activated
+    ) (nop4))
   1 (fork XX (multi lalt (unmod (lctl) tab) (on-press press-vkey valt)) (nop4))
   2 (tap-dance-eager 200 (
-    (multi @mods-tab lsft)
-    (multi @mods-tab nop1)
+    (multi lsft @mods-tab)
+    (multi nop1 @mods-tab)
   ))
-  3 (multi @mods-tab @ctl>)
-  4 (multi @mods-tab @<=>)
-
-  9 (multi sft (unmod (ctl) 9))
-  0 (multi sft (unmod (ctl) 0))
-  - C--
-  = C-=
+  3 (multi lctl @mods-tab)
+  4 (multi @<=> @mods-tab)
 )
 (defalias mods-tab (multi (layer-while-held mods-tab) (on-release release-vkey valt) (on-release release-vkey vctl)))
-(defalias holdTab (multi nop4 @mods-tab @arrows-jiko))
+(defalias holdTab (multi lctl nop4 @mods-tab @arrows-jiko))
 (defalias tapTab tab)
 (defalias tab (tap-hold-press 200 200 @tapTab @holdTab))
 
@@ -295,6 +288,9 @@
 ;; nop0 is the "go to extreme" button <=>l
 ;; nop3 is a "ctl" button. All ctl buttons trigger nop3, except the tab key for which certain keys are unmoded.
 ;; Repeated arrow means ctrl+arrow (word jump). Only defined for left and right.
+
+(defalias ctl** (tap-dance-eager 200 ((multi lctl) (multi lctl lsft))))
+(defalias <=>  (multi nop0))
 (defalias ←    (fork (fork (fork left    C-left   (nop3)) home   (nop0)) (fork   @🖱←   @☸←   (nop0))   (nop1)))
 (defalias ↑    (fork (fork (fork up      C-up     (nop3)) pgup   (nop0)) (fork   @🖱↑   @☸↑   (nop0))   (nop1)))
 (defalias ↓    (fork (fork (fork down    C-down   (nop3)) pgdn   (nop0)) (fork   @🖱↓   @☸↓   (nop0))   (nop1)))
