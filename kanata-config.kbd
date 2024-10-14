@@ -235,11 +235,6 @@
 )
 
 
-(defalias mods-234 (layer-while-held mods-234))
-(deflayermap (mods-234) 3 (multi ctl @mods-234) 2 (multi lsft @mods-234) 4 (multi @<=> @mods-234))
-(defalias arrows-jiko-234 (multi @mods-234 @arrows-jiko))
-
-
 (defalias <=>  (multi nop0))
 (defalias ctl> (tap-dance-eager 200 (lctl @<=> (multi lctl))))
 
@@ -276,9 +271,8 @@
   (tap-hold-press 200 200 (macro ] ]) (multi lsft (multi @arrows-jiko (fork XX nop1 (ralt)))))
 )))
 (defalias caps (tap-dance-eager 200 (
-  @arrows-jiko
-  (tap-hold-press 200 200 caps (multi lsft @arrows-jiko))
-  (multi nop1 @arrows-jiko)
+  (multi @mods-tab @arrows-jiko)
+  (tap-hold-press 200 200 caps (multi nop1 @mods-tab @arrows-jiko))
 )))
 
 (defalias \ \)
